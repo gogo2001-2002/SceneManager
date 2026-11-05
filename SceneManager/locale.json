@@ -1,0 +1,40 @@
+{
+    "translations": {
+        "de": {
+            "Mode": "Modus",
+            "Active Scene": "Aktive Szene",
+            "Recall / Execute": "Abrufen / Ausführen",
+            "Save Current State": "Aktuellen Zustand speichern",
+            "Save %s": "%s speichern",
+            "Scene \"%s\" executed": "Szene \"%s\" aufgerufen",
+            "Current state saved to scene \"%s\"": "Aktueller Zustand in Szene \"%s\" gespeichert",
+            "Scene \"%s\" updated": "Szene \"%s\" aktualisiert",
+            "Start": "Starten",
+            "Save": "Speichern",
+            "Ready": "Bereit",
+            "Devices": "Geräte",
+            "Scenes": "Szenen",
+            "Device Configuration": "Gerätekonfiguration",
+            "Scene Configuration": "Szenenkonfiguration",
+            "Options & Visualization": "Optionen & Visualisierung",
+            "Device Name": "Gerätename",
+            "Device Type": "Gerätetyp",
+            "Light (On/Off)": "Licht (An/Aus)",
+            "Switch (On/Off)": "Schalten (An/Aus)",
+            "Shutter (Up/Down/Position)": "Rollo (Hoch/Runter/Position)",
+            "Climate (On/Off)": "Klimaanlage (An/Aus)",
+            "Target Variable": "Zielvariable",
+            "Scene ID": "Szenen-ID",
+            "Scene Name": "Szenenname",
+            "Icon": "Icon",
+            "Create Save Variable in Visu": "Speichern-Variable in Visu anlegen",
+            "Enable HTML Tile Visualization": "HTML-SDK Kachel in Visualisierung aktivieren",
+            "Reset Scene Variable after Execution (Momentary Push)": "Szenen-Variable nach Ausführung zurücksetzen (Taster-Verhalten)",
+            "Switching Delay between Devices (ms)": "Schaltverzögerung zwischen Geräten (ms)",
+            "Actions / Test": "Aktionen / Schnelltest",
+            "Select Scene": "Szene auswählen",
+            "Execute Scene": "Szene ausführen",
+            "Save Current Values to Scene": "Aktuelle Gerätewerte in Szene speichern"
+        }
+    }
+}

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szenen-Manager</title>
+    <style>
+        :root {
+            --bg-color: #1a1e24;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-color: #e5e7eb;
+            --text-muted: #9ca3af;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --success-hover: #059669;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 12px;
+            --transition: all 0.2s ease-in-out;
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-color: #f3f4f6;
+                --card-bg: #ffffff;
+                --card-border: rgba(0, 0, 0, 0.08);
+                --text-color: #1f2937;
+                --text-muted: #6b7280;
+                --primary: #2563eb;
+                --primary-hover: #1d4ed8;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: transparent;
+            color: var(--text-color);
+            padding: 14px;
+            font-size: 14px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .active-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mode-toggle {
+            display: inline-flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 2px;
+            border: 1px solid var(--card-border);
+        }
+
+        .mode-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .mode-btn.save-active {
+            background: var(--danger);
+            color: #ffffff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .scene-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 14px;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .scene-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .scene-card.active-scene {
+            border-color: var(--success);
+            background: linear-gradient(145deg, var(--card-bg), rgba(16, 185, 129, 0.08));
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: 1px solid var(--card-border);
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: var(--transition);
+            flex: 1;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: transparent;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #ffffff;
+            border-color: transparent;
+        }
+
+        .btn-success:hover {
+            background: var(--success-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #ffffff;
+            border-color: transparent;
+        }
+
+        .btn-icon {
+            padding: 7px 9px;
+            flex: 0 0 auto;
+        }
+
+        /* Editor Section */
+        .editor {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .device-row {
+            background: rgba(0, 0, 0, 0.12);
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .device-row.disabled {
+            opacity: 0.45;
+        }
+
+        .device-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .device-label {
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .device-type-tag {
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+        }
+
+        .device-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        /* Switch Toggle */
+        .toggle-switch {
+            display: inline-flex;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-opt {
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .toggle-opt.selected {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        /* Shutter Slider & Buttons */
+        .slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .shutter-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-val {
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 34px;
+            text-align: right;
+        }
+
+        .shutter-presets {
+            display: flex;
+            gap: 4px;
+        }
+
+        .preset-btn {
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .preset-btn:hover {
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Checkbox */
+        .checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #111827;
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #toast.show {
+            opacity: 1;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 13px;
+            border: 1px dashed var(--card-border);
+            border-radius: var(--radius);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-title">
+            <span>🎬 Szenen</span>
+            <span id="activeBadge" class="active-badge" style="display: none;">
+                ● <span id="activeSceneName">Keine</span>
+            </span>
+        </div>
+        <div class="mode-toggle">
+            <button id="btnModeExecute" class="mode-btn active" onclick="setMode(0)">Ausführen</button>
+            <button id="btnModeSave" class="mode-btn" onclick="setMode(1)">Speichern</button>
+        </div>
+    </div>
+
+    <div id="scenesGrid" class="grid">
+        <div class="empty-state">Lade Szenen...</div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        let currentState = {
+            mode: 0,
+            activeSceneId: 0,
+            scenes: [],
+            devices: [],
+            sceneValues: {}
+        };
+        let openEditorSceneId = null;
+
+        // HTML-SDK message receiver
+        window.handleMessage = function(data) {
+            try {
+                const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                if (!parsed) return;
+
+                if (parsed.mode !== undefined) currentState.mode = parsed.mode;
+                if (parsed.activeSceneId !== undefined) currentState.activeSceneId = parsed.activeSceneId;
+                if (parsed.scenes) currentState.scenes = parsed.scenes;
+                if (parsed.devices) currentState.devices = parsed.devices;
+                if (parsed.sceneValues) currentState.sceneValues = parsed.sceneValues;
+
+                renderUI();
+
+                if (parsed.toast) {
+                    showToast(parsed.toast);
+                }
+            } catch (e) {
+                console.error("handleMessage error:", e);
+            }
+        };
+
+        function request(ident, value) {
+            if (typeof window.requestAction === 'function') {
+                window.requestAction(ident, value);
+            } else {
+                console.log("requestAction simulation:", ident, value);
+            }
+        }
+
+        function setMode(mode) {
+            currentState.mode = mode;
+            request('Mode', mode);
+            updateModeButtons();
+        }
+
+        function updateModeButtons() {
+            const btnExec = document.getElementById('btnModeExecute');
+            const btnSave = document.getElementById('btnModeSave');
+            if (currentState.mode === 1) {
+                btnExec.className = 'mode-btn';
+                btnSave.className = 'mode-btn save-active active';
+            } else {
+                btnExec.className = 'mode-btn active';
+                btnSave.className = 'mode-btn';
+            }
+        }
+
+        function executeScene(id) {
+            if (currentState.mode === 1) {
+                saveScene(id);
+            } else {
+                request('ExecuteScene', id);
+            }
+        }
+
+        function saveScene(id) {
+            request('SaveScene', id);
+        }
+
+        function toggleEditor(id) {
+            openEditorSceneId = (openEditorSceneId === id) ? null : id;
+            renderUI();
+        }
+
+        function saveEditedScene(sceneId) {
+            const targets = {};
+            currentState.devices.forEach(dev => {
+                const devId = String(dev.id);
+                const enCheck = document.getElementById(`en_${sceneId}_${devId}`);
+                const isEnabled = enCheck ? enCheck.checked : true;
+
+                if (dev.type === 'shutter') {
+                    const slider = document.getElementById(`shutter_${sceneId}_${devId}`);
+                    const pos = slider ? parseInt(slider.value, 10) : 0;
+                    targets[devId] = { enabled: isEnabled, mode: 'position', value: pos };
+                } else {
+                    const activeOpt = document.querySelector(`.toggle-group-${sceneId}-${devId} .selected`);
+                    const val = activeOpt ? (activeOpt.getAttribute('data-val') === 'true') : false;
+                    targets[devId] = { enabled: isEnabled, value: val };
+                }
+            });
+
+            request('SaveSceneDetails', JSON.stringify({ sceneId: sceneId, targets: targets }));
+            openEditorSceneId = null;
+        }
+
+        function setToggleVal(sceneId, devId, val) {
+            const group = document.querySelectorAll(`.toggle-group-${sceneId}-${devId} .toggle-opt`);
+            group.forEach(el => {
+                el.classList.toggle('selected', el.getAttribute('data-val') === String(val));
+            });
+        }
+
+        function setShutterVal(sceneId, devId, val) {
+            const slider = document.getElementById(`shutter_${sceneId}_${devId}`);
+            const label = document.getElementById(`shutter_val_${sceneId}_${devId}`);
+            if (slider) slider.value = val;
+            if (label) label.textContent = `${val}%`;
+        }
+
+        function toggleDeviceEnabled(sceneId, devId) {
+            const enCheck = document.getElementById(`en_${sceneId}_${devId}`);
+            const row = document.getElementById(`row_${sceneId}_${devId}`);
+            if (enCheck && row) {
+                row.classList.toggle('disabled', !enCheck.checked);
+            }
+        }
+
+        function showToast(text) {
+            const t = document.getElementById('toast');
+            t.textContent = text;
+            t.className = 'show';
+            setTimeout(() => { t.className = ''; }, 3200);
+        }
+
+        function renderUI() {
+            updateModeButtons();
+
+            const grid = document.getElementById('scenesGrid');
+            const activeBadge = document.getElementById('activeBadge');
+            const activeSceneName = document.getElementById('activeSceneName');
+
+            const scenes = currentState.scenes || [];
+            const devices = currentState.devices || [];
+            const sceneValues = currentState.sceneValues || {};
+
+            let activeFound = null;
+            if (currentState.activeSceneId) {
+                activeFound = scenes.find(s => parseInt(s.id, 10) === parseInt(currentState.activeSceneId, 10));
+            }
+
+            if (activeFound) {
+                activeBadge.style.display = 'inline-flex';
+                activeSceneName.textContent = activeFound.name;
+            } else {
+                activeBadge.style.display = 'none';
+            }
+
+            if (scenes.length === 0) {
+                grid.innerHTML = '<div class="empty-state">Keine Szenen konfiguriert. Bitte in der Instanz-Konfiguration Szenen und Geräte hinzufügen.</div>';
+                return;
+            }
+
+            grid.innerHTML = scenes.map(scene => {
+                const sId = parseInt(scene.id, 10);
+                const isActive = (sId === parseInt(currentState.activeSceneId, 10));
+                const isEditorOpen = (openEditorSceneId === sId);
+                const sVal = sceneValues[String(sId)] || scene.targets || {};
+
+                return `
+                    <div class="scene-card ${isActive ? 'active-scene' : ''}">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span>${getSceneIcon(scene.icon)}</span>
+                                <span>${escapeHtml(scene.name)}</span>
+                            </div>
+                            ${isActive ? '<span class="active-badge">Aktiv</span>' : ''}
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="btn ${currentState.mode === 1 ? 'btn-danger' : 'btn-primary'}" onclick="executeScene(${sId})">
+                                ${currentState.mode === 1 ? '💾 Jetzt Speichern' : '▶ Starten'}
+                            </button>
+                            <button class="btn btn-icon" title="Aktuellen Zustand in Szene speichern" onclick="saveScene(${sId})">
+                                💾
+                            </button>
+                            <button class="btn btn-icon" title="Gerätewerte anpassen" onclick="toggleEditor(${sId})">
+                                ⚙
+                            </button>
+                        </div>
+
+                        ${isEditorOpen ? renderEditor(sId, devices, sVal) : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderEditor(sceneId, devices, sceneTargets) {
+            if (!devices || devices.length === 0) {
+                return `
+                    <div class="editor">
+                        <div style="font-size: 12px; color: var(--text-muted); text-align: center;">Keine Geräte konfiguriert.</div>
+                        <button class="btn" onclick="toggleEditor(${sceneId})">Schließen</button>
+                    </div>
+                `;
+            }
+
+            const rows = devices.map(dev => {
+                const dId = String(dev.id);
+                const target = sceneTargets[dId] || { enabled: true, value: dev.currentValue ?? false };
+                const isEnabled = target.enabled !== false;
+                const type = dev.type || 'switch';
+
+                let ctrlHtml = '';
+                if (type === 'shutter') {
+                    const pos = (target.value !== undefined) ? parseInt(target.value, 10) : (dev.currentValue ?? 0);
+                    ctrlHtml = `
+                        <div class="slider-wrapper">
+                            <div class="shutter-presets">
+                                <button type="button" class="preset-btn" onclick="setShutterVal(${sceneId}, '${dId}', 0)">0%</button>
+                                <button type="button" class="preset-btn" onclick="setShutterVal(${sceneId}, '${dId}', 50)">50%</button>
+                                <button type="button" class="preset-btn" onclick="setShutterVal(${sceneId}, '${dId}', 100)">100%</button>
+                            </div>
+                            <input type="range" min="0" max="100" value="${pos}" id="shutter_${sceneId}_${dId}" class="shutter-slider"
+                                oninput="document.getElementById('shutter_val_${sceneId}_${dId}').textContent = this.value + '%'">
+                            <span id="shutter_val_${sceneId}_${dId}" class="slider-val">${pos}%</span>
+                        </div>
+                    `;
+                } else {
+                    const boolVal = Boolean(target.value);
+                    ctrlHtml = `
+                        <div class="toggle-switch toggle-group-${sceneId}-${dId}">
+                            <div class="toggle-opt ${!boolVal ? 'selected' : ''}" data-val="false" onclick="setToggleVal(${sceneId}, '${dId}', false)">Aus</div>
+                            <div class="toggle-opt ${boolVal ? 'selected' : ''}" data-val="true" onclick="setToggleVal(${sceneId}, '${dId}', true)">An</div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div id="row_${sceneId}_${dId}" class="device-row ${!isEnabled ? 'disabled' : ''}">
+                        <div class="device-info">
+                            <span class="device-label">
+                                ${getTypeIcon(type)}
+                                ${escapeHtml(dev.name || 'Gerät ' + dId)}
+                            </span>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="en_${sceneId}_${dId}" ${isEnabled ? 'checked' : ''} onchange="toggleDeviceEnabled(${sceneId}, '${dId}')">
+                                In Szene
+                            </label>
+                        </div>
+                        <div class="device-ctrl">
+                            ${ctrlHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="editor">
+                    <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px;">
+                        Geräteeinstellungen für diese Szene:
+                    </div>
+                    ${rows}
+                    <div style="display: flex; gap: 6px; margin-top: 6px;">
+                        <button class="btn btn-success" onclick="saveEditedScene(${sceneId})">💾 Szene speichern</button>
+                        <button class="btn" onclick="toggleEditor(${sceneId})">✕ Schließen</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSceneIcon(icon) {
+            if (!icon) return '🎬';
+            const i = icon.toLowerCase();
+            if (i.includes('sun') || i.includes('tag')) return '☀️';
+            if (i.includes('moon') || i.includes('nacht')) return '🌙';
+            if (i.includes('film') || i.includes('kino') || i.includes('movie')) return '🍿';
+            if (i.includes('food') || i.includes('essen')) return '🍽️';
+            if (i.includes('party')) return '🎉';
+            if (i.includes('light') || i.includes('lamp')) return '💡';
+            if (i.includes('power') || i.includes('off') || i.includes('aus')) return '⭕';
+            return '🎬';
+        }
+
+        function getTypeIcon(type) {
+            switch (type) {
+                case 'light': return '💡';
+                case 'switch': return '🔌';
+                case 'shutter': return '🪟';
+                case 'climate': return '❄️';
+                default: return '⚡';
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Initialize tile
+        document.addEventListener('DOMContentLoaded', () => {
+            request('GetTileState', '');
+        });
+    </script>
+</body>
+</html>

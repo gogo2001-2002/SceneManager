@@ -1,0 +1,12 @@
+{
+    "id": "{E1A3359E-6B2E-4267-855D-05EEDC35BB25}",
+    "name": "IPS-SceneManager",
+    "author": "gogo2001-2002",
+    "url": "https://github.com/gogo2001-2002/IPS-SceneManager",
+    "compatibility": {
+        "version": "7.1"
+    },
+    "version": "1.0",
+    "build": 1,
+    "date": 0
+}

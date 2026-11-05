@@ -1,0 +1,16 @@
+{
+    "id": "{404B39C5-5AA3-453E-B05C-CDDCEFF9DE68}",
+    "name": "SceneManager",
+    "type": 3,
+    "vendor": "Community",
+    "aliases": [
+        "Szenen-Manager",
+        "Szenensteuerung"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "SM",
+    "version": "1.0",
+    "build": 1
+}

@@ -1,0 +1,165 @@
+{
+    "elements": [
+        {
+            "type": "ExpansionPanel",
+            "caption": "Gerätekonfiguration",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "Devices",
+                    "caption": "Geräte",
+                    "rowCount": 6,
+                    "add": true,
+                    "delete": true,
+                    "changeOrder": true,
+                    "columns": [
+                        {
+                            "name": "id",
+                            "caption": "ID",
+                            "width": "70px",
+                            "add": 1,
+                            "edit": {
+                                "type": "NumberSpinner",
+                                "minimum": 1
+                            }
+                        },
+                        {
+                            "name": "name",
+                            "caption": "Gerätename",
+                            "width": "220px",
+                            "add": "Neues Gerät",
+                            "edit": {
+                                "type": "ValidationTextBox"
+                            }
+                        },
+                        {
+                            "name": "type",
+                            "caption": "Gerätetyp",
+                            "width": "200px",
+                            "add": "light",
+                            "edit": {
+                                "type": "Select",
+                                "options": [
+                                    { "caption": "Licht (An/Aus)", "value": "light" },
+                                    { "caption": "Schalten (An/Aus)", "value": "switch" },
+                                    { "caption": "Rollo (Hoch/Runter/Position)", "value": "shutter" },
+                                    { "caption": "Klimaanlage (An/Aus)", "value": "climate" }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "variableID",
+                            "caption": "Zielvariable",
+                            "width": "auto",
+                            "add": 0,
+                            "edit": {
+                                "type": "SelectVariable"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Szenenkonfiguration",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "Scenes",
+                    "caption": "Szenen",
+                    "rowCount": 6,
+                    "add": true,
+                    "delete": true,
+                    "changeOrder": true,
+                    "columns": [
+                        {
+                            "name": "id",
+                            "caption": "Szenen-ID",
+                            "width": "80px",
+                            "add": 1,
+                            "edit": {
+                                "type": "NumberSpinner",
+                                "minimum": 1
+                            }
+                        },
+                        {
+                            "name": "name",
+                            "caption": "Szenenname",
+                            "width": "220px",
+                            "add": "Neue Szene",
+                            "edit": {
+                                "type": "ValidationTextBox"
+                            }
+                        },
+                        {
+                            "name": "icon",
+                            "caption": "Icon",
+                            "width": "140px",
+                            "add": "Lightbulb",
+                            "edit": {
+                                "type": "ValidationTextBox"
+                            }
+                        },
+                        {
+                            "name": "createSaveVariable",
+                            "caption": "Speichern-Variable in Visu",
+                            "width": "180px",
+                            "add": false,
+                            "edit": {
+                                "type": "CheckBox"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Optionen & Visualisierung",
+            "items": [
+                {
+                    "type": "CheckBox",
+                    "name": "UseHTMLTile",
+                    "caption": "HTML-SDK Kachel in Visualisierung aktivieren"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "ResetExecutionVariable",
+                    "caption": "Szenen-Variable nach Ausführung zurücksetzen (Taster-Verhalten)"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "SwitchDelay",
+                    "caption": "Schaltverzögerung zwischen Geräten (ms)",
+                    "minimum": 0,
+                    "maximum": 5000,
+                    "suffix": "ms"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "TestSceneID",
+                    "caption": "Szenen-ID für Test",
+                    "value": 1
+                },
+                {
+                    "type": "Button",
+                    "caption": "Szene ausführen",
+                    "onClick": "SM_ExecuteScene($id, $TestSceneID);"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Aktuelle Gerätewerte in Szene speichern",
+                    "onClick": "SM_SaveScene($id, $TestSceneID);"
+                }
+            ]
+        }
+    ]
+}
