@@ -149,6 +149,38 @@ class SceneManager extends IPSModule
             return;
         }
 
+        if ($Ident === 'CreateScene') {
+            $payload = is_string($Value) ? json_decode($Value, true) : $Value;
+            if (is_array($payload) && !empty($payload['name'])) {
+                $this->CreateScene(
+                    (string)$payload['name'],
+                    (string)($payload['icon'] ?? 'Lightbulb'),
+                    (array)($payload['targets'] ?? []),
+                    !empty($payload['createSaveVariable'])
+                );
+            }
+            return;
+        }
+
+        if ($Ident === 'UpdateScene') {
+            $payload = is_string($Value) ? json_decode($Value, true) : $Value;
+            if (is_array($payload) && isset($payload['sceneId'])) {
+                $this->UpdateScene(
+                    (int)$payload['sceneId'],
+                    (string)($payload['name'] ?? ''),
+                    (string)($payload['icon'] ?? ''),
+                    (array)($payload['targets'] ?? []),
+                    isset($payload['createSaveVariable']) ? (bool)$payload['createSaveVariable'] : null
+                );
+            }
+            return;
+        }
+
+        if ($Ident === 'DeleteScene') {
+            $this->DeleteScene((int)$Value);
+            return;
+        }
+
         if ($Ident === 'SaveSceneDetails') {
             $payload = is_string($Value) ? json_decode($Value, true) : $Value;
             if (is_array($payload) && isset($payload['sceneId'], $payload['targets'])) {
@@ -320,6 +352,115 @@ class SceneManager extends IPSModule
 
         $sceneName = (string)($targetScene['name'] ?? ('Scene ' . $SceneID));
         $this->PushVisualizationState(sprintf($this->Translate('Current state saved to scene "%s"'), $sceneName));
+    }
+
+    /**
+     * Creates a new scene dynamically from the visualization or script.
+     */
+    public function CreateScene(string $Name, string $Icon = 'Lightbulb', array $Targets = [], bool $CreateSaveVariable = false): int
+    {
+        $scenes = $this->GetConfiguredScenes();
+        $maxId = 0;
+        foreach ($scenes as $s) {
+            $sId = (int)($s['id'] ?? 0);
+            if ($sId > $maxId) {
+                $maxId = $sId;
+            }
+        }
+        $newId = $maxId + 1;
+
+        $newScene = [
+            'id'                 => $newId,
+            'name'               => $Name !== '' ? $Name : ('Szene ' . $newId),
+            'icon'               => $Icon ?: 'Lightbulb',
+            'createSaveVariable' => $CreateSaveVariable
+        ];
+
+        $scenes[] = $newScene;
+
+        // Save targets into SceneValues attribute
+        $allValues = $this->GetSceneValues();
+        $allValues[(string)$newId] = $Targets;
+        $this->WriteAttributeString('SceneValues', json_encode($allValues));
+
+        // Persist scenes property and apply changes so the Boolean variable is created
+        IPS_SetProperty($this->InstanceID, 'Scenes', json_encode($scenes));
+        IPS_ApplyChanges($this->InstanceID);
+
+        $this->PushVisualizationState(sprintf($this->Translate('Scene "%s" created'), $newScene['name']));
+        return $newId;
+    }
+
+    /**
+     * Deletes a scene and cleans up its variables.
+     */
+    public function DeleteScene(int $SceneID): void
+    {
+        $scenes = $this->GetConfiguredScenes();
+        $newScenes = [];
+        $deletedName = '';
+
+        foreach ($scenes as $s) {
+            if ((int)$s['id'] === $SceneID) {
+                $deletedName = (string)$s['name'];
+                continue;
+            }
+            $newScenes[] = $s;
+        }
+
+        $allValues = $this->GetSceneValues();
+        unset($allValues[(string)$SceneID]);
+        $this->WriteAttributeString('SceneValues', json_encode($allValues));
+
+        if ($this->ReadAttributeInteger('ActiveSceneID') === $SceneID) {
+            $this->WriteAttributeInteger('ActiveSceneID', 0);
+            $this->SetValue('ActiveScene', '');
+        }
+
+        IPS_SetProperty($this->InstanceID, 'Scenes', json_encode($newScenes));
+        IPS_ApplyChanges($this->InstanceID);
+
+        $this->PushVisualizationState(sprintf($this->Translate('Scene "%s" deleted'), $deletedName ?: (string)$SceneID));
+    }
+
+    /**
+     * Updates an existing scene's metadata and device targets.
+     */
+    public function UpdateScene(int $SceneID, string $Name, string $Icon, array $Targets, ?bool $CreateSaveVariable = null): void
+    {
+        $scenes = $this->GetConfiguredScenes();
+        $found = false;
+        $finalName = $Name;
+
+        foreach ($scenes as &$s) {
+            if ((int)$s['id'] === $SceneID) {
+                if ($Name !== '') {
+                    $s['name'] = $Name;
+                    $finalName = $Name;
+                }
+                if ($Icon !== '') {
+                    $s['icon'] = $Icon;
+                }
+                if ($CreateSaveVariable !== null) {
+                    $s['createSaveVariable'] = $CreateSaveVariable;
+                }
+                $found = true;
+                break;
+            }
+        }
+
+        if ($found) {
+            if (!empty($Targets)) {
+                $allValues = $this->GetSceneValues();
+                $allValues[(string)$SceneID] = $Targets;
+                $this->WriteAttributeString('SceneValues', json_encode($allValues));
+            }
+
+            IPS_SetProperty($this->InstanceID, 'Scenes', json_encode($scenes));
+            IPS_ApplyChanges($this->InstanceID);
+
+            $this->PushVisualizationState(sprintf($this->Translate('Scene "%s" updated'), $finalName ?: (string)$SceneID));
+        }
     }
 
     /**

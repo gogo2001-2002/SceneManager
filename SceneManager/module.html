@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Szenen-Manager</title>
+    <title>SceneManager</title>
     <style>
         :root {
             --bg-color: #1a1e24;
@@ -17,6 +17,7 @@
             --success-hover: #059669;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --danger-hover: #dc2626;
             --radius: 12px;
             --transition: all 0.2s ease-in-out;
         }
@@ -56,11 +57,19 @@
             margin-bottom: 14px;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--card-border);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .header-title {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 17px;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -72,10 +81,16 @@
             border-radius: 9999px;
             background: rgba(16, 185, 129, 0.15);
             color: var(--success);
-            font-weight: 500;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
             gap: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .mode-toggle {
@@ -109,52 +124,6 @@
             color: #ffffff;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 12px;
-        }
-
-        .scene-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            padding: 14px;
-            transition: var(--transition);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .scene-card:hover {
-            border-color: rgba(59, 130, 246, 0.4);
-        }
-
-        .scene-card.active-scene {
-            border-color: var(--success);
-            background: linear-gradient(145deg, var(--card-bg), rgba(16, 185, 129, 0.08));
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 6px;
-        }
-
         .btn {
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-color);
@@ -162,18 +131,17 @@
             padding: 7px 12px;
             border-radius: 8px;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
             transition: var(--transition);
-            flex: 1;
         }
 
         .btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.16);
         }
 
         .btn-primary {
@@ -202,29 +170,238 @@
             border-color: transparent;
         }
 
-        .btn-icon {
-            padding: 7px 9px;
-            flex: 0 0 auto;
+        .btn-danger:hover {
+            background: var(--danger-hover);
         }
 
-        /* Editor Section */
-        .editor {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid var(--card-border);
+        .btn-icon {
+            padding: 6px 9px;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, var(--primary), #2563eb);
+            color: #ffffff;
+            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
+            border: none;
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+
+        .btn-add:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Grid & Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .scene-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 14px;
+            transition: var(--transition);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
         }
 
-        .device-row {
-            background: rgba(0, 0, 0, 0.12);
-            border-radius: 8px;
-            padding: 8px 10px;
+        .scene-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .scene-card.active-scene {
+            border-color: var(--success);
+            background: linear-gradient(145deg, var(--card-bg), rgba(16, 185, 129, 0.08));
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-menu {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .card-actions .btn-main {
+            flex: 1;
+        }
+
+        .devices-summary {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .device-pill {
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--card-border);
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 14px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #1e242d;
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 16px 18px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-footer {
+            padding: 12px 18px;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .form-group {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--card-border);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+
+        .icon-picker {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .icon-opt {
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .icon-opt:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .icon-opt.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        /* Device Configuration in Modal */
+        .devices-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .device-row {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: var(--transition);
         }
 
         .device-row.disabled {
@@ -237,30 +414,40 @@
             align-items: center;
         }
 
-        .device-label {
+        .device-title {
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .device-type-tag {
+        .device-type-badge {
             font-size: 10px;
-            padding: 2px 5px;
+            padding: 2px 6px;
             border-radius: 4px;
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .device-toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
         }
 
         .device-ctrl {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-top: 2px;
+            gap: 10px;
+            padding-top: 2px;
         }
 
-        /* Switch Toggle */
+        /* Toggle Switches */
         .toggle-switch {
             display: inline-flex;
             border-radius: 6px;
@@ -270,9 +457,9 @@
         }
 
         .toggle-opt {
-            padding: 4px 10px;
+            padding: 5px 12px;
             font-size: 11px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             color: var(--text-muted);
             transition: var(--transition);
@@ -283,7 +470,7 @@
             color: #ffffff;
         }
 
-        /* Shutter Slider & Buttons */
+        /* Shutter Slider & Controls */
         .slider-wrapper {
             display: flex;
             align-items: center;
@@ -301,9 +488,9 @@
         }
 
         .slider-val {
-            font-size: 11px;
-            font-weight: 600;
-            min-width: 34px;
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 38px;
             text-align: right;
         }
 
@@ -314,7 +501,7 @@
 
         .preset-btn {
             font-size: 10px;
-            padding: 3px 6px;
+            padding: 4px 6px;
             border-radius: 4px;
             border: 1px solid var(--card-border);
             background: rgba(255, 255, 255, 0.05);
@@ -327,16 +514,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Checkbox */
-        .checkbox-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 11px;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
         /* Toast */
         #toast {
             position: fixed;
@@ -344,14 +521,14 @@
             right: 20px;
             background: #111827;
             color: #ffffff;
-            padding: 10px 16px;
+            padding: 10px 18px;
             border-radius: 8px;
             font-size: 13px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
-            z-index: 999;
+            z-index: 2000;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -362,31 +539,96 @@
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 30px;
+            padding: 36px 20px;
             color: var(--text-muted);
             font-size: 13px;
             border: 1px dashed var(--card-border);
             border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-title">
-            <span>🎬 Szenen</span>
-            <span id="activeBadge" class="active-badge" style="display: none;">
-                ● <span id="activeSceneName">Keine</span>
-            </span>
+        <div class="header-left">
+            <div class="header-title">
+                <span>🎬 Szenen</span>
+                <span id="activeBadge" class="active-badge" style="display: none;">
+                    ● <span id="activeSceneName">Keine</span>
+                </span>
+            </div>
         </div>
-        <div class="mode-toggle">
-            <button id="btnModeExecute" class="mode-btn active" onclick="setMode(0)">Ausführen</button>
-            <button id="btnModeSave" class="mode-btn" onclick="setMode(1)">Speichern</button>
+        <div class="header-actions">
+            <button class="btn btn-add" onclick="openNewSceneModal()">➕ Neue Szene</button>
+            <div class="mode-toggle">
+                <button id="btnModeExecute" class="mode-btn active" onclick="setMode(0)">Ausführen</button>
+                <button id="btnModeSave" class="mode-btn" onclick="setMode(1)">Speichern</button>
+            </div>
         </div>
     </div>
 
     <div id="scenesGrid" class="grid">
-        <div class="empty-state">Lade Szenen...</div>
+        <div class="empty-state">
+            <span>Lade Szenen...</span>
+        </div>
+    </div>
+
+    <!-- Modal: Neue Szene / Szene bearbeiten -->
+    <div id="sceneModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span id="modalTitle">➕ Neue Szene anlegen</span>
+                <button class="btn btn-icon" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Szenenname</label>
+                    <input type="text" id="modalSceneName" class="form-input" placeholder="z. B. Fernsehabend, Lesen, Gemütlich...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Icon</label>
+                    <div class="icon-picker" id="modalIconPicker">
+                        <div class="icon-opt selected" data-icon="Film" onclick="selectIcon('Film')">🍿 Film</div>
+                        <div class="icon-opt" data-icon="Sun" onclick="selectIcon('Sun')">☀️ Tag</div>
+                        <div class="icon-opt" data-icon="Moon" onclick="selectIcon('Moon')">🌙 Nacht</div>
+                        <div class="icon-opt" data-icon="Sofa" onclick="selectIcon('Sofa')">🛋️ Sofa</div>
+                        <div class="icon-opt" data-icon="Food" onclick="selectIcon('Food')">🍽️ Essen</div>
+                        <div class="icon-opt" data-icon="Party" onclick="selectIcon('Party')">🎉 Party</div>
+                        <div class="icon-opt" data-icon="Lightbulb" onclick="selectIcon('Lightbulb')">💡 Licht</div>
+                        <div class="icon-opt" data-icon="Fire" onclick="selectIcon('Fire')">🔥 Kamin</div>
+                        <div class="icon-opt" data-icon="Book" onclick="selectIcon('Book')">📖 Lesen</div>
+                        <div class="icon-opt" data-icon="Power" onclick="selectIcon('Power')">⭕ Aus</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
+                    <span class="form-label">Gerätekombination</span>
+                    <button type="button" class="btn btn-icon" style="font-size: 11px; padding: 4px 8px;" onclick="applyCurrentLiveToModal()">
+                        ⚡ Live-Raumwerte übernehmen
+                    </button>
+                </div>
+
+                <div class="devices-box" id="modalDevicesBox">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <div style="padding-top: 6px;">
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: var(--text-muted);">
+                        <input type="checkbox" id="modalCreateSaveVar">
+                        <span>Separate Speichern-Taste als Variable in Visu anlegen</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal()">Abbrechen</button>
+                <button class="btn btn-success" onclick="saveModalScene()">💾 Szene speichern</button>
+            </div>
+        </div>
     </div>
 
     <div id="toast"></div>
@@ -399,9 +641,9 @@
             devices: [],
             sceneValues: {}
         };
-        let openEditorSceneId = null;
+        let currentModalSceneId = null; // null = new scene, number = editing existing scene
+        let selectedIcon = 'Film';
 
-        // HTML-SDK message receiver
         window.handleMessage = function(data) {
             try {
                 const parsed = typeof data === 'string' ? JSON.parse(data) : data;
@@ -427,7 +669,7 @@
             if (typeof window.requestAction === 'function') {
                 window.requestAction(ident, value);
             } else {
-                console.log("requestAction simulation:", ident, value);
+                console.log("requestAction:", ident, value);
             }
         }
 
@@ -461,61 +703,206 @@
             request('SaveScene', id);
         }
 
-        function toggleEditor(id) {
-            openEditorSceneId = (openEditorSceneId === id) ? null : id;
-            renderUI();
+        function deleteScene(id, name) {
+            if (confirm(`Möchtest du die Szene "${name}" wirklich löschen?`)) {
+                request('DeleteScene', id);
+            }
         }
 
-        function saveEditedScene(sceneId) {
-            const targets = {};
-            currentState.devices.forEach(dev => {
-                const devId = String(dev.id);
-                const enCheck = document.getElementById(`en_${sceneId}_${devId}`);
-                const isEnabled = enCheck ? enCheck.checked : true;
+        // --- Modal Dialog for Creating & Editing Scenes ---
 
-                if (dev.type === 'shutter') {
-                    const slider = document.getElementById(`shutter_${sceneId}_${devId}`);
-                    const pos = slider ? parseInt(slider.value, 10) : 0;
-                    targets[devId] = { enabled: isEnabled, mode: 'position', value: pos };
+        function openNewSceneModal() {
+            currentModalSceneId = null;
+            document.getElementById('modalTitle').textContent = '➕ Neue Szene anlegen';
+            document.getElementById('modalSceneName').value = '';
+            document.getElementById('modalCreateSaveVar').checked = false;
+            selectIcon('Film');
+
+            renderModalDevices({});
+            document.getElementById('sceneModal').classList.add('open');
+        }
+
+        function openEditSceneModal(sceneId) {
+            currentModalSceneId = sceneId;
+            const scene = (currentState.scenes || []).find(s => parseInt(s.id, 10) === parseInt(sceneId, 10));
+            if (!scene) return;
+
+            document.getElementById('modalTitle').textContent = `✏️ Szene "${scene.name}" bearbeiten`;
+            document.getElementById('modalSceneName').value = scene.name || '';
+            document.getElementById('modalCreateSaveVar').checked = Boolean(scene.createSaveVariable);
+            selectIcon(scene.icon || 'Film');
+
+            const sVal = (currentState.sceneValues || {})[String(sceneId)] || scene.targets || {};
+            renderModalDevices(sVal);
+
+            document.getElementById('sceneModal').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('sceneModal').classList.remove('open');
+        }
+
+        function selectIcon(icon) {
+            selectedIcon = icon;
+            const opts = document.querySelectorAll('#modalIconPicker .icon-opt');
+            opts.forEach(el => {
+                el.classList.toggle('selected', el.getAttribute('data-icon') === icon);
+            });
+        }
+
+        function renderModalDevices(existingTargets) {
+            const container = document.getElementById('modalDevicesBox');
+            const devices = currentState.devices || [];
+
+            if (devices.length === 0) {
+                container.innerHTML = `
+                    <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 14px; border: 1px dashed var(--card-border); border-radius: 8px;">
+                        Noch keine Geräte in der Modul-Konfiguration hinterlegt.<br>
+                        Bitte in der Symcon-Konsole unter 'Geräte' Lichter, Rollos etc. hinzufügen.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = devices.map(dev => {
+                const dId = String(dev.id);
+                const target = existingTargets[dId] || { enabled: true, value: dev.currentValue ?? false };
+                const isEnabled = target.enabled !== false;
+                const type = dev.type || 'switch';
+
+                let ctrlHtml = '';
+                if (type === 'shutter') {
+                    const pos = (target.value !== undefined) ? parseInt(target.value, 10) : (dev.currentValue ?? 0);
+                    ctrlHtml = `
+                        <div class="slider-wrapper">
+                            <div class="shutter-presets">
+                                <button type="button" class="preset-btn" onclick="setModalShutterVal('${dId}', 0)">0%</button>
+                                <button type="button" class="preset-btn" onclick="setModalShutterVal('${dId}', 50)">50%</button>
+                                <button type="button" class="preset-btn" onclick="setModalShutterVal('${dId}', 100)">100%</button>
+                            </div>
+                            <input type="range" min="0" max="100" value="${pos}" id="modal_shutter_${dId}" class="shutter-slider"
+                                oninput="document.getElementById('modal_shutter_val_${dId}').textContent = this.value + '%'">
+                            <span id="modal_shutter_val_${dId}" class="slider-val">${pos}%</span>
+                        </div>
+                    `;
                 } else {
-                    const activeOpt = document.querySelector(`.toggle-group-${sceneId}-${devId} .selected`);
-                    const val = activeOpt ? (activeOpt.getAttribute('data-val') === 'true') : false;
-                    targets[devId] = { enabled: isEnabled, value: val };
+                    const boolVal = Boolean(target.value);
+                    ctrlHtml = `
+                        <div class="toggle-switch toggle-group-modal-${dId}">
+                            <div class="toggle-opt ${!boolVal ? 'selected' : ''}" data-val="false" onclick="setModalToggleVal('${dId}', false)">Aus</div>
+                            <div class="toggle-opt ${boolVal ? 'selected' : ''}" data-val="true" onclick="setModalToggleVal('${dId}', true)">An</div>
+                        </div>
+                    `;
                 }
-            });
 
-            request('SaveSceneDetails', JSON.stringify({ sceneId: sceneId, targets: targets }));
-            openEditorSceneId = null;
+                return `
+                    <div id="modal_dev_row_${dId}" class="device-row ${!isEnabled ? 'disabled' : ''}">
+                        <div class="device-info">
+                            <label class="device-toggle-row">
+                                <input type="checkbox" id="modal_dev_en_${dId}" ${isEnabled ? 'checked' : ''} onchange="toggleModalDeviceEnabled('${dId}')">
+                                <span class="device-title">
+                                    ${getTypeIcon(type)} ${escapeHtml(dev.name || 'Gerät ' + dId)}
+                                </span>
+                            </label>
+                            <span class="device-type-badge">${getTypeLabel(type)}</span>
+                        </div>
+                        <div class="device-ctrl">
+                            ${ctrlHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function setToggleVal(sceneId, devId, val) {
-            const group = document.querySelectorAll(`.toggle-group-${sceneId}-${devId} .toggle-opt`);
-            group.forEach(el => {
-                el.classList.toggle('selected', el.getAttribute('data-val') === String(val));
-            });
-        }
-
-        function setShutterVal(sceneId, devId, val) {
-            const slider = document.getElementById(`shutter_${sceneId}_${devId}`);
-            const label = document.getElementById(`shutter_val_${sceneId}_${devId}`);
-            if (slider) slider.value = val;
-            if (label) label.textContent = `${val}%`;
-        }
-
-        function toggleDeviceEnabled(sceneId, devId) {
-            const enCheck = document.getElementById(`en_${sceneId}_${devId}`);
-            const row = document.getElementById(`row_${sceneId}_${devId}`);
+        function toggleModalDeviceEnabled(devId) {
+            const enCheck = document.getElementById(`modal_dev_en_${devId}`);
+            const row = document.getElementById(`modal_dev_row_${devId}`);
             if (enCheck && row) {
                 row.classList.toggle('disabled', !enCheck.checked);
             }
         }
 
-        function showToast(text) {
-            const t = document.getElementById('toast');
-            t.textContent = text;
-            t.className = 'show';
-            setTimeout(() => { t.className = ''; }, 3200);
+        function setModalToggleVal(devId, val) {
+            const group = document.querySelectorAll(`.toggle-group-modal-${devId} .toggle-opt`);
+            group.forEach(el => {
+                el.classList.toggle('selected', el.getAttribute('data-val') === String(val));
+            });
         }
+
+        function setModalShutterVal(devId, val) {
+            const slider = document.getElementById(`modal_shutter_${devId}`);
+            const label = document.getElementById(`modal_shutter_val_${devId}`);
+            if (slider) slider.value = val;
+            if (label) label.textContent = `${val}%`;
+        }
+
+        function applyCurrentLiveToModal() {
+            (currentState.devices || []).forEach(dev => {
+                const dId = String(dev.id);
+                const enCheck = document.getElementById(`modal_dev_en_${dId}`);
+                if (enCheck) enCheck.checked = true;
+                toggleModalDeviceEnabled(dId);
+
+                if (dev.type === 'shutter') {
+                    setModalShutterVal(dId, dev.currentValue ?? 0);
+                } else {
+                    setModalToggleVal(dId, Boolean(dev.currentValue));
+                }
+            });
+            showToast('Aktuelle Live-Werte in Formular übernommen');
+        }
+
+        function saveModalScene() {
+            const nameInput = document.getElementById('modalSceneName');
+            const name = (nameInput.value || '').trim();
+            if (!name) {
+                alert('Bitte gib einen Szenennamen ein.');
+                nameInput.focus();
+                return;
+            }
+
+            const createSaveVar = document.getElementById('modalCreateSaveVar').checked;
+
+            const targets = {};
+            (currentState.devices || []).forEach(dev => {
+                const dId = String(dev.id);
+                const enCheck = document.getElementById(`modal_dev_en_${dId}`);
+                const isEnabled = enCheck ? enCheck.checked : true;
+
+                if (dev.type === 'shutter') {
+                    const slider = document.getElementById(`modal_shutter_${dId}`);
+                    const pos = slider ? parseInt(slider.value, 10) : 0;
+                    targets[dId] = { enabled: isEnabled, mode: 'position', value: pos };
+                } else {
+                    const activeOpt = document.querySelector(`.toggle-group-modal-${dId} .selected`);
+                    const val = activeOpt ? (activeOpt.getAttribute('data-val') === 'true') : false;
+                    targets[dId] = { enabled: isEnabled, value: val };
+                }
+            });
+
+            if (currentModalSceneId === null) {
+                // Create New Scene
+                request('CreateScene', JSON.stringify({
+                    name: name,
+                    icon: selectedIcon,
+                    targets: targets,
+                    createSaveVariable: createSaveVar
+                }));
+            } else {
+                // Update Existing Scene
+                request('UpdateScene', JSON.stringify({
+                    sceneId: currentModalSceneId,
+                    name: name,
+                    icon: selectedIcon,
+                    targets: targets,
+                    createSaveVariable: createSaveVar
+                }));
+            }
+
+            closeModal();
+        }
+
+        // --- Render Main Visu UI ---
 
         function renderUI() {
             updateModeButtons();
@@ -541,15 +928,26 @@
             }
 
             if (scenes.length === 0) {
-                grid.innerHTML = '<div class="empty-state">Keine Szenen konfiguriert. Bitte in der Instanz-Konfiguration Szenen und Geräte hinzufügen.</div>';
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <span style="font-size: 24px;">🎬</span>
+                        <span>Noch keine Szenen vorhanden. Klicke oben auf <strong>➕ Neue Szene</strong>, um deine erste Szene für beliebige Geräte anzulegen.</span>
+                        <button class="btn btn-add" onclick="openNewSceneModal()">➕ Jetzt erste Szene anlegen</button>
+                    </div>
+                `;
                 return;
             }
 
             grid.innerHTML = scenes.map(scene => {
                 const sId = parseInt(scene.id, 10);
                 const isActive = (sId === parseInt(currentState.activeSceneId, 10));
-                const isEditorOpen = (openEditorSceneId === sId);
                 const sVal = sceneValues[String(sId)] || scene.targets || {};
+
+                // Generate device summary pills
+                const activeDevicePills = devices
+                    .filter(d => sVal[String(d.id)] && sVal[String(d.id)].enabled !== false)
+                    .map(d => `<span class="device-pill">${getTypeIcon(d.type)} ${escapeHtml(d.name)}</span>`)
+                    .join('');
 
                 return `
                     <div class="scene-card ${isActive ? 'active-scene' : ''}">
@@ -558,99 +956,30 @@
                                 <span>${getSceneIcon(scene.icon)}</span>
                                 <span>${escapeHtml(scene.name)}</span>
                             </div>
-                            ${isActive ? '<span class="active-badge">Aktiv</span>' : ''}
+                            <div class="card-menu">
+                                ${isActive ? '<span class="active-badge">Aktiv</span>' : ''}
+                                <button class="btn btn-icon" title="Szene anpassen & Gerätekombination bearbeiten" onclick="openEditSceneModal(${sId})">
+                                    ✏️
+                                </button>
+                                <button class="btn btn-icon" title="Szene löschen" onclick="deleteScene(${sId}, '${escapeHtml(scene.name)}')">
+                                    🗑️
+                                </button>
+                            </div>
                         </div>
+
+                        ${activeDevicePills ? `<div class="devices-summary">${activeDevicePills}</div>` : ''}
 
                         <div class="card-actions">
-                            <button class="btn ${currentState.mode === 1 ? 'btn-danger' : 'btn-primary'}" onclick="executeScene(${sId})">
+                            <button class="btn btn-main ${currentState.mode === 1 ? 'btn-danger' : 'btn-primary'}" onclick="executeScene(${sId})">
                                 ${currentState.mode === 1 ? '💾 Jetzt Speichern' : '▶ Starten'}
                             </button>
-                            <button class="btn btn-icon" title="Aktuellen Zustand in Szene speichern" onclick="saveScene(${sId})">
+                            <button class="btn btn-icon" title="Aktuellen Raum-Zustand in diese Szene übernehmen" onclick="saveScene(${sId})">
                                 💾
                             </button>
-                            <button class="btn btn-icon" title="Gerätewerte anpassen" onclick="toggleEditor(${sId})">
-                                ⚙
-                            </button>
-                        </div>
-
-                        ${isEditorOpen ? renderEditor(sId, devices, sVal) : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderEditor(sceneId, devices, sceneTargets) {
-            if (!devices || devices.length === 0) {
-                return `
-                    <div class="editor">
-                        <div style="font-size: 12px; color: var(--text-muted); text-align: center;">Keine Geräte konfiguriert.</div>
-                        <button class="btn" onclick="toggleEditor(${sceneId})">Schließen</button>
-                    </div>
-                `;
-            }
-
-            const rows = devices.map(dev => {
-                const dId = String(dev.id);
-                const target = sceneTargets[dId] || { enabled: true, value: dev.currentValue ?? false };
-                const isEnabled = target.enabled !== false;
-                const type = dev.type || 'switch';
-
-                let ctrlHtml = '';
-                if (type === 'shutter') {
-                    const pos = (target.value !== undefined) ? parseInt(target.value, 10) : (dev.currentValue ?? 0);
-                    ctrlHtml = `
-                        <div class="slider-wrapper">
-                            <div class="shutter-presets">
-                                <button type="button" class="preset-btn" onclick="setShutterVal(${sceneId}, '${dId}', 0)">0%</button>
-                                <button type="button" class="preset-btn" onclick="setShutterVal(${sceneId}, '${dId}', 50)">50%</button>
-                                <button type="button" class="preset-btn" onclick="setShutterVal(${sceneId}, '${dId}', 100)">100%</button>
-                            </div>
-                            <input type="range" min="0" max="100" value="${pos}" id="shutter_${sceneId}_${dId}" class="shutter-slider"
-                                oninput="document.getElementById('shutter_val_${sceneId}_${dId}').textContent = this.value + '%'">
-                            <span id="shutter_val_${sceneId}_${dId}" class="slider-val">${pos}%</span>
-                        </div>
-                    `;
-                } else {
-                    const boolVal = Boolean(target.value);
-                    ctrlHtml = `
-                        <div class="toggle-switch toggle-group-${sceneId}-${dId}">
-                            <div class="toggle-opt ${!boolVal ? 'selected' : ''}" data-val="false" onclick="setToggleVal(${sceneId}, '${dId}', false)">Aus</div>
-                            <div class="toggle-opt ${boolVal ? 'selected' : ''}" data-val="true" onclick="setToggleVal(${sceneId}, '${dId}', true)">An</div>
-                        </div>
-                    `;
-                }
-
-                return `
-                    <div id="row_${sceneId}_${dId}" class="device-row ${!isEnabled ? 'disabled' : ''}">
-                        <div class="device-info">
-                            <span class="device-label">
-                                ${getTypeIcon(type)}
-                                ${escapeHtml(dev.name || 'Gerät ' + dId)}
-                            </span>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="en_${sceneId}_${dId}" ${isEnabled ? 'checked' : ''} onchange="toggleDeviceEnabled(${sceneId}, '${dId}')">
-                                In Szene
-                            </label>
-                        </div>
-                        <div class="device-ctrl">
-                            ${ctrlHtml}
                         </div>
                     </div>
                 `;
             }).join('');
-
-            return `
-                <div class="editor">
-                    <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px;">
-                        Geräteeinstellungen für diese Szene:
-                    </div>
-                    ${rows}
-                    <div style="display: flex; gap: 6px; margin-top: 6px;">
-                        <button class="btn btn-success" onclick="saveEditedScene(${sceneId})">💾 Szene speichern</button>
-                        <button class="btn" onclick="toggleEditor(${sceneId})">✕ Schließen</button>
-                    </div>
-                </div>
-            `;
         }
 
         function getSceneIcon(icon) {
@@ -659,9 +988,12 @@
             if (i.includes('sun') || i.includes('tag')) return '☀️';
             if (i.includes('moon') || i.includes('nacht')) return '🌙';
             if (i.includes('film') || i.includes('kino') || i.includes('movie')) return '🍿';
+            if (i.includes('sofa') || i.includes('gemuet') || i.includes('wohn')) return '🛋️';
             if (i.includes('food') || i.includes('essen')) return '🍽️';
             if (i.includes('party')) return '🎉';
             if (i.includes('light') || i.includes('lamp')) return '💡';
+            if (i.includes('fire') || i.includes('kamin')) return '🔥';
+            if (i.includes('book') || i.includes('lese')) return '📖';
             if (i.includes('power') || i.includes('off') || i.includes('aus')) return '⭕';
             return '🎬';
         }
@@ -676,6 +1008,16 @@
             }
         }
 
+        function getTypeLabel(type) {
+            switch (type) {
+                case 'light': return 'Licht';
+                case 'switch': return 'Schalten';
+                case 'shutter': return 'Rollo';
+                case 'climate': return 'Klima';
+                default: return 'Gerät';
+            }
+        }
+
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -686,7 +1028,13 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Initialize tile
+        function showToast(text) {
+            const t = document.getElementById('toast');
+            t.textContent = text;
+            t.className = 'show';
+            setTimeout(() => { t.className = ''; }, 3200);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             request('GetTileState', '');
         });

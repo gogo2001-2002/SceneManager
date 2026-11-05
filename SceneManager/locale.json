@@ -9,6 +9,8 @@
             "Scene \"%s\" executed": "Szene \"%s\" aufgerufen",
             "Current state saved to scene \"%s\"": "Aktueller Zustand in Szene \"%s\" gespeichert",
             "Scene \"%s\" updated": "Szene \"%s\" aktualisiert",
+            "Scene \"%s\" created": "Szene \"%s\" erstellt",
+            "Scene \"%s\" deleted": "Szene \"%s\" gelöscht",
             "Start": "Starten",
             "Save": "Speichern",
             "Ready": "Bereit",
