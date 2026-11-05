@@ -1,4 +1,4 @@
-# IPS-SceneManager (Szenen-Manager für IP-Symcon)
+# SceneManager (Szenen-Manager für IP-Symcon)
 
 Ein flexibles und intuitives Szenen-Steuerungs-Modul für [IP-Symcon](https://www.symcon.de/) (kompatibel mit Symcon 7.1, 8.x und 9.x) mit nativer Kachel-Visualisierung (HTML-SDK) und vollständiger Unterstützung für:
 
@@ -37,7 +37,7 @@ Jede Szene erhält automatisch eine eigene **Boolean-Statusvariable**, mit der d
 ## 📁 Repository-Struktur
 
 ```text
-IPS-SceneManager/
+SceneManager/
 ├── library.json                 # Symcon Bibliotheks-Definition
 ├── README.md                    # Dokumentation
 ├── .gitignore
@@ -58,7 +58,7 @@ Das Repository kann direkt in IP-Symcon über das **Module Control** eingebunden
 1. Öffne die Symcon Verwaltungskonsole.
 2. Navigiere zu **Kern-Instanzen** -> **Modules**.
 3. Klicke auf **Hinzufügen** (`+`) und gib die Repository-URL ein:
-   `https://github.com/gogo2001-2002/IPS-SceneManager.git`
+   `https://github.com/gogo2001-2002/SceneManager.git`
 
 ### 2. Instanz anlegen
 1. Klicke im Objektbaum auf **Instanz hinzufügen** (`+`).
