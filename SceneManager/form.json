@@ -68,11 +68,6 @@
                     "caption": "HTML-SDK Kachel in Visualisierung aktivieren"
                 },
                 {
-                    "type": "CheckBox",
-                    "name": "ResetExecutionVariable",
-                    "caption": "Szenen-Variable nach Ausführung zurücksetzen (Taster-Verhalten)"
-                },
-                {
                     "type": "NumberSpinner",
                     "name": "SwitchDelay",
                     "caption": "Schaltverzögerung zwischen Geräten (ms)",
@@ -107,3 +102,4 @@
         }
     ]
 }
+
