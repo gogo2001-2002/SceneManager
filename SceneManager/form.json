@@ -2,68 +2,12 @@
     "elements": [
         {
             "type": "ExpansionPanel",
-            "caption": "Gerätekonfiguration",
-            "items": [
-                {
-                    "type": "List",
-                    "name": "Devices",
-                    "caption": "Geräte",
-                    "rowCount": 6,
-                    "add": true,
-                    "delete": true,
-                    "changeOrder": true,
-                    "columns": [
-                        {
-                            "name": "id",
-                            "caption": "ID",
-                            "width": "70px",
-                            "add": 1,
-                            "edit": {
-                                "type": "NumberSpinner",
-                                "minimum": 1
-                            }
-                        },
-                        {
-                            "name": "name",
-                            "caption": "Gerätename",
-                            "width": "220px",
-                            "add": "Neues Gerät",
-                            "edit": {
-                                "type": "ValidationTextBox"
-                            }
-                        },
-                        {
-                            "name": "type",
-                            "caption": "Gerätetyp",
-                            "width": "200px",
-                            "add": "light",
-                            "edit": {
-                                "type": "Select",
-                                "options": [
-                                    { "caption": "Licht (An/Aus)", "value": "light" },
-                                    { "caption": "Schalten (An/Aus)", "value": "switch" },
-                                    { "caption": "Rollo (Hoch/Runter/Position)", "value": "shutter" },
-                                    { "caption": "Klimaanlage (An/Aus)", "value": "climate" }
-                                ]
-                            }
-                        },
-                        {
-                            "name": "variableID",
-                            "caption": "Zielvariable",
-                            "width": "auto",
-                            "add": 0,
-                            "edit": {
-                                "type": "SelectVariable"
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "type": "ExpansionPanel",
             "caption": "Szenenkonfiguration",
             "items": [
+                {
+                    "type": "Label",
+                    "caption": "Jede Szene enthält ihre eigenen Geräte. Geräte und Zielwerte werden in der HTML-Kachel ausgewählt."
+                },
                 {
                     "type": "List",
                     "name": "Scenes",
@@ -96,7 +40,7 @@
                             "name": "icon",
                             "caption": "Icon",
                             "width": "140px",
-                            "add": "Lightbulb",
+                            "add": "🎬",
                             "edit": {
                                 "type": "ValidationTextBox"
                             }
@@ -156,7 +100,7 @@
                 },
                 {
                     "type": "Button",
-                    "caption": "Aktuelle Gerätewerte in Szene speichern",
+                    "caption": "Live-Werte der Szenengeräte speichern",
                     "onClick": "SM_SaveScene($id, $TestSceneID);"
                 }
             ]
