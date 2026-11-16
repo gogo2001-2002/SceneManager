@@ -164,7 +164,13 @@ function targetCategorySymbol(target){
 }
 function renderTargets(){
   const box=document.getElementById('targetList');
-  const entries=Object.values(editorTargets||{}).sort((a,b)=>String(a.selectionLabel||a.name||'').localeCompare(String(b.selectionLabel||b.name||''),'de-DE',{sensitivity:'base'}));
+  const categoryOrder={'Licht':0,'Rollos':1,'Klima':2,'Klimageräte':2,'Verbraucher':3};
+  const entries=Object.values(editorTargets||{}).sort((a,b)=>{
+    const categoryA=getTargetCategory(a),categoryB=getTargetCategory(b);
+    const categoryDifference=(categoryOrder[categoryA]??99)-(categoryOrder[categoryB]??99);
+    if(categoryDifference!==0)return categoryDifference;
+    return String(a.selectionLabel||a.name||'').localeCompare(String(b.selectionLabel||b.name||''),'de-DE',{sensitivity:'base'});
+  });
   if(!entries.length){box.innerHTML='<div class="empty">Noch keine Geräte in dieser Szene. Wähle sie über „Geräte hinzufügen“ aus.</div>';return;}
   box.innerHTML=entries.map(target=>{
     const id=Number(target.variableID),type=Number(target.variableType),associations=Array.isArray(target.associations)?target.associations:[];
