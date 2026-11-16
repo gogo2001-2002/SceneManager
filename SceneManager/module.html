@@ -80,7 +80,7 @@ function updateIconPreview(){document.getElementById('sceneIconPreview').textCon
 function getTargets(sceneId){return (currentState.sceneValues||{})[String(sceneId)]||{};}
 function renderScenes(){
   const grid=document.getElementById('scenesGrid');
-  const scenes=currentState.scenes||[];
+  const scenes=(currentState.scenes||[]).slice().sort((a,b)=>String(a.name||('Szene '+a.id)).localeCompare(String(b.name||('Szene '+b.id)),'de-DE',{sensitivity:'base',numeric:true}));
   if(!scenes.length){grid.innerHTML='<div class="empty">Noch keine Szenen. Lege eine Szene an und wähle dafür die gewünschten Geräte aus.</div>';return;}
   grid.innerHTML=scenes.map(scene=>{
     const id=Number(scene.id);
