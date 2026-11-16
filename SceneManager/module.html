@@ -18,6 +18,7 @@ button,input,select{font:inherit;color:inherit}button{cursor:pointer}
 .modal-wrap{display:none;position:fixed;inset:0;background:#0009;z-index:99;padding:12px;align-items:flex-start;justify-content:center;overflow:auto}.modal-wrap.open{display:flex}.modal{background:#111827;border:1px solid #4b5563;border-radius:16px;width:min(760px,100%);max-height:calc(100vh - 24px);display:flex;flex-direction:column;box-shadow:0 25px 70px #0008}.modal-head,.modal-foot{padding:12px 14px;border-bottom:1px solid #374151;display:flex;align-items:center;justify-content:space-between;gap:9px}.modal-foot{border-bottom:0;border-top:1px solid #374151;justify-content:flex-end}.modal-title{font-weight:750;font-size:16px}.modal-body{padding:13px;overflow:auto;display:grid;gap:13px}
 .field{display:grid;gap:5px}.field label,.small-label{font-size:11px;color:#cbd5e1;font-weight:650}.input{width:100%;background:#1f2937;border:1px solid #4b5563;border-radius:9px;padding:9px 10px;outline:none}.input:focus{border-color:#60a5fa;box-shadow:0 0 0 2px #3b82f633}
 .search-results{display:grid;gap:6px;max-height:190px;overflow:auto}.result{border:1px solid var(--border);background:#1f2937;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}.result:hover{border-color:#60a5fa}.result-name{font-size:12px;font-weight:650}.result-path{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+.catalog{display:grid;gap:8px;max-height:330px;overflow:auto}.catalog-group{border:1px solid var(--border);border-radius:10px;overflow:hidden}.catalog-heading{font-size:11px;font-weight:750;color:#cbd5e1;padding:7px 9px;background:#172131;position:sticky;top:0}.catalog-items{display:grid}.catalog-item{display:flex;align-items:flex-start;gap:9px;padding:8px 9px;border-top:1px solid #ffffff0d;cursor:pointer}.catalog-item:hover{background:#ffffff08}.catalog-item input{margin:2px 0 0;accent-color:#3b82f6}.catalog-label{font-size:12px;font-weight:650}.catalog-path{display:block;font-size:10px;color:var(--muted);overflow-wrap:anywhere}.catalog-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}.icon-select{display:flex;gap:8px;align-items:center}.icon-select select{width:100%;background:#1f2937;border:1px solid #4b5563;border-radius:9px;padding:9px 10px}
 .target-list{display:grid;gap:8px}.target{background:#1b2533;border:1px solid #374151;border-radius:12px;padding:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px}.target-head{grid-column:1/-1;display:flex;align-items:flex-start;gap:8px}.target-title{font-size:12px;font-weight:700;flex:1;min-width:0;overflow-wrap:anywhere}.target-type{display:block;color:var(--muted);font-size:10px;font-weight:450}.target-value{min-width:0}.target-value input,.target-value select{width:100%;background:#111827;border:1px solid #4b5563;border-radius:8px;padding:8px}
 .profile-note{font-size:10px;color:#94a3b8;margin-top:4px}.muted{color:var(--muted)}.toast{position:fixed;bottom:12px;left:50%;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:#0f172a;border:1px solid #475569;border-radius:10px;padding:9px 13px;font-size:12px;z-index:110;transition:.2s;max-width:90vw}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:520px){body{padding:8px}.top{align-items:flex-start}.top .btn{padding:7px 9px;font-size:12px}.grid{grid-template-columns:1fr}.modal-wrap{padding:6px}.modal{max-height:calc(100vh - 12px)}.scene{padding:12px}}
@@ -36,12 +37,13 @@ button,input,select{font:inherit;color:inherit}button{cursor:pointer}
     <header class="modal-head"><div class="modal-title" id="modalTitle">Szene</div><button class="btn icon" onclick="closeSceneEditor()" aria-label="Schließen">✕</button></header>
     <div class="modal-body">
       <div class="field"><label for="sceneName">Name der Szene</label><input class="input" id="sceneName" maxlength="80" placeholder="z. B. Feierabend"></div>
-      <div class="field"><label for="sceneIcon">Symbol (optional)</label><input class="input" id="sceneIcon" maxlength="32" value="🎬" placeholder="🎬"></div>
+      <div class="field"><label for="sceneIcon">Symbol auswählen</label><div class="icon-select"><span id="sceneIconPreview" aria-hidden="true">🎬</span><select id="sceneIcon" onchange="updateIconPreview()"><option value="🎬">🎬 Film</option><option value="🏠">🏠 Zuhause</option><option value="🌙">🌙 Nacht</option><option value="☀️">☀️ Tag</option><option value="🌅">🌅 Morgen</option><option value="💡">💡 Licht</option><option value="🛋️">🛋️ Wohnen</option><option value="🛏️">🛏️ Schlafen</option><option value="🌡️">🌡️ Klima</option><option value="🚪">🚪 Tür</option><option value="🎉">🎉 Feier</option><option value="🔒">🔒 Abwesend</option><option value="✨">✨ Eigenes</option></select></div></div>
       <div class="field">
-        <label for="deviceSearch">Symcon-Gerät oder Variable suchen</label>
-        <input class="input" id="deviceSearch" autocomplete="off" placeholder="Mindestens 2 Zeichen eingeben">
-        <div id="searchHint" class="profile-note">Es werden nur Variablen mit einer Symcon-Schaltaktion angeboten.</div>
-        <div id="searchResults" class="search-results"></div>
+        <label for="deviceSearch">Geräte und Funktionen auswählen</label>
+        <input class="input" id="deviceSearch" autocomplete="off" placeholder="Gerät oder Raum filtern (optional)">
+        <div id="searchHint" class="profile-note">Licht · Rollos (Aktuelle Position) · Klima (An/Aus und Solltemperatur) · Verbraucher</div>
+        <div id="deviceCatalog" class="catalog"></div>
+        <div class="catalog-actions"><span id="selectionCount" class="profile-note">0 Geräte ausgewählt</span><button type="button" class="btn primary" onclick="applySelectedDevices()">Übernehmen</button></div>
       </div>
       <div class="field"><div class="small-label">Geräte dieser Szene und Zielwerte</div><div id="targetList" class="target-list"></div></div>
     </div>
@@ -50,15 +52,15 @@ button,input,select{font:inherit;color:inherit}button{cursor:pointer}
 </div>
 <div id="toast" class="toast"></div>
 <script>
-let currentState={scenes:[],sceneValues:{},searchResults:[],activeSceneId:0};
-let editorSceneId=null,editorTargets={},searchTimer=0,toastTimer=0,requestSequence=0;
+let currentState={scenes:[],sceneValues:{},deviceCatalog:[],activeSceneId:0};
+let editorSceneId=null,editorTargets={},selectedDeviceIds=new Set(),searchTimer=0,toastTimer=0;
 window.handleMessage=function(data){
   try{
     const state=typeof data==='string'?JSON.parse(data):data;
     if(!state)return;
     currentState={...currentState,...state};
     renderScenes();
-    renderSearchResults();
+    renderDeviceCatalog();
     if(document.getElementById('sceneModal').classList.contains('open'))renderTargets();
     if(state.toast)showToast(state.toast);
   }catch(error){console.error('Szenenstatus konnte nicht gelesen werden',error);}
@@ -69,6 +71,7 @@ function request(ident,value){
 }
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));}
 function sceneIcon(icon){return icon||'🎬';}
+function updateIconPreview(){document.getElementById('sceneIconPreview').textContent=document.getElementById('sceneIcon').value||'🎬';}
 function getTargets(sceneId){return (currentState.sceneValues||{})[String(sceneId)]||{};}
 function renderScenes(){
   const grid=document.getElementById('scenesGrid');
@@ -94,42 +97,39 @@ function openSceneEditor(sceneId=null){
   const scene=editorSceneId===null?null:(currentState.scenes||[]).find(item=>Number(item.id)===editorSceneId);
   document.getElementById('modalTitle').textContent=scene?'Szene bearbeiten':'Neue Szene';
   document.getElementById('sceneName').value=scene?(scene.name||''):'';
-  document.getElementById('sceneIcon').value=scene?(scene.icon||'🎬'):'🎬';
+  const iconSelect=document.getElementById('sceneIcon'),iconValue=scene?(scene.icon||'🎬'):'🎬';
+  if(!Array.from(iconSelect.options).some(option=>option.value===iconValue)){const option=document.createElement('option');option.value=iconValue;option.textContent=iconValue+' Aktuelles Symbol';iconSelect.appendChild(option);}
+  iconSelect.value=iconValue;updateIconPreview();
   editorTargets=scene?JSON.parse(JSON.stringify(getTargets(editorSceneId))):{};
+  selectedDeviceIds=new Set(Object.keys(editorTargets));
   document.getElementById('deviceSearch').value='';
-  currentState.searchResults=[];
-  renderSearchResults();renderTargets();
+  renderDeviceCatalog();renderTargets();
   document.getElementById('sceneModal').classList.add('open');
   document.getElementById('sceneName').focus();
 }
-function closeSceneEditor(){document.getElementById('sceneModal').classList.remove('open');editorSceneId=null;editorTargets={};}
-function searchDevices(){
-  const query=document.getElementById('deviceSearch').value.trim();
-  if(query.length<2){currentState.searchResults=[];renderSearchResults();return;}
-  const sequence=++requestSequence;
-  window.pendingSearchSequence=sequence;
-  request('SearchDevices',query);
-}
-document.getElementById('deviceSearch').addEventListener('input',()=>{
-  window.clearTimeout(searchTimer);searchTimer=window.setTimeout(searchDevices,250);
-});
-function renderSearchResults(){
-  const box=document.getElementById('searchResults');
-  const query=document.getElementById('deviceSearch').value.trim();
-  const results=currentState.searchResults||[];
-  if(query.length<2){box.innerHTML='';return;}
-  if(!results.length){box.innerHTML='<div class="profile-note">Keine passenden schaltbaren Variablen gefunden.</div>';return;}
-  box.innerHTML=results.map(device=>{
-    const id=Number(device.variableID);
-    const already=Boolean(editorTargets[String(id)]);
-    return '<button type="button" class="result" '+(already?'disabled':'')+' onclick="addDevice('+id+')"><span><span class="result-name">'+escapeHtml(device.name||('Variable '+id))+'</span><span class="result-path">'+escapeHtml(device.path||'')+'</span></span><span class="btn small">'+(already?'Hinzugefügt':'＋ Hinzufügen')+'</span></button>';
+function closeSceneEditor(){document.getElementById('sceneModal').classList.remove('open');editorSceneId=null;editorTargets={};selectedDeviceIds.clear();}
+function renderDeviceCatalog(){
+  const box=document.getElementById('deviceCatalog');if(!box)return;
+  const query=document.getElementById('deviceSearch').value.trim().toLocaleLowerCase('de-DE');
+  const groups=currentState.deviceCatalog||[];
+  const html=groups.map(group=>{
+    const items=(group.items||[]).filter(item=>!query||((item.selectionLabel||item.name||'')+' '+(item.path||'')).toLocaleLowerCase('de-DE').includes(query));
+    if(!items.length)return '';
+    return '<section class="catalog-group"><div class="catalog-heading">'+escapeHtml(group.label)+' <span class="muted">('+items.length+')</span></div><div class="catalog-items">'+items.map(item=>{
+      const id=Number(item.variableID),checked=selectedDeviceIds.has(String(id));
+      return '<label class="catalog-item"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleCatalogSelection('+id+',this.checked)"><span><span class="catalog-label">'+escapeHtml(item.selectionLabel||item.name||('Variable '+id))+'</span><span class="catalog-path">'+escapeHtml(item.path||'')+'</span></span></label>';
+    }).join('')+'</div></section>';
   }).join('');
+  box.innerHTML=html||'<div class="empty">Keine passenden Geräte in den ausgewählten Webvisu-Bereichen gefunden.</div>';
+  updateSelectionCount();
 }
-function addDevice(id){
-  const device=(currentState.searchResults||[]).find(item=>Number(item.variableID)===Number(id));
-  if(!device)return;
-  editorTargets[String(id)]={...device,value:device.currentValue};
-  renderTargets();renderSearchResults();
+document.getElementById('deviceSearch').addEventListener('input',()=>renderDeviceCatalog());
+function toggleCatalogSelection(id,checked){if(checked)selectedDeviceIds.add(String(id));else selectedDeviceIds.delete(String(id));updateSelectionCount();}
+function updateSelectionCount(){const count=selectedDeviceIds.size,el=document.getElementById('selectionCount');if(el)el.textContent=count+' '+(count===1?'Gerät':'Geräte')+' ausgewählt';}
+function applySelectedDevices(){
+  const byId=new Map();(currentState.deviceCatalog||[]).forEach(group=>(group.items||[]).forEach(item=>byId.set(String(item.variableID),item)));
+  selectedDeviceIds.forEach(id=>{const item=byId.get(id);if(item&&!editorTargets[id])editorTargets[id]={...item,value:item.currentValue};});
+  selectedDeviceIds.clear();renderDeviceCatalog();renderTargets();
 }
 function renderTargets(){
   const box=document.getElementById('targetList');
@@ -174,7 +174,7 @@ function saveSceneEditor(){
   const sceneId=editorSceneId;
   const name=document.getElementById('sceneName').value.trim();
   if(!name){showToast('Bitte einen Namen für die Szene eingeben.');document.getElementById('sceneName').focus();return;}
-  const payload={name,icon:document.getElementById('sceneIcon').value.trim()||'🎬',targets:editorTargets};
+  const payload={name,icon:document.getElementById('sceneIcon').value||'🎬',targets:editorTargets};
   closeSceneEditor();
   if(sceneId===null)request('CreateScene',JSON.stringify(payload));
   else request('UpdateScene',JSON.stringify({sceneId,...payload}));
@@ -188,3 +188,4 @@ document.addEventListener('DOMContentLoaded',()=>request('GetTileState',''));
 </script>
 </body>
 </html>
+
