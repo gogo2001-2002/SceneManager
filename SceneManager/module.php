@@ -373,12 +373,15 @@ class SceneManager extends IPSModule
         foreach (IPS_GetVariableList() as $varId) {
             $varId = (int)$varId;
             $variable = IPS_GetVariable($varId);
-            if ((int)($variable['VariableAction'] ?? 0) <= 0 || (int)IPS_GetObject($varId)['ParentID'] === $this->InstanceID) {
+            if (!$this->HasVariableAction($variable) || (int)IPS_GetObject($varId)['ParentID'] === $this->InstanceID) {
                 continue;
             }
             $path = $this->GetObjectPath($varId);
             $haystack = function_exists('mb_strtolower') ? mb_strtolower($path, 'UTF-8') : strtolower($path);
             $position = function_exists('mb_strpos') ? mb_strpos($haystack, $needle, 0, 'UTF-8') : strpos($haystack, $needle);
+            if ($position === false && ctype_digit($query) && (int)$query === $varId) {
+                $position = 0;
+            }
             if ($position === false) {
                 continue;
             }
@@ -459,7 +462,7 @@ class SceneManager extends IPSModule
             throw new InvalidArgumentException("Variable {$VariableID} does not exist.");
         }
         $variable = IPS_GetVariable($VariableID);
-        if ((int)($variable['VariableAction'] ?? 0) <= 0) {
+        if (!$this->HasVariableAction($variable)) {
             throw new InvalidArgumentException("Variable {$VariableID} has no action.");
         }
         $type = (int)$variable['VariableType'];
@@ -576,7 +579,7 @@ class SceneManager extends IPSModule
             'typeName' => $typeNames[(int)$variable['VariableType']] ?? 'unknown',
             'currentValue' => GetValue($VariableID),
             'currentFormatted' => GetValueFormatted($VariableID),
-            'actionable' => (int)($variable['VariableAction'] ?? 0) > 0,
+            'actionable' => $this->HasVariableAction($variable),
             'profileName' => $profileData['profileName'],
             'profileMin' => $profileData['profileMin'],
             'profileMax' => $profileData['profileMax'],
@@ -594,6 +597,12 @@ class SceneManager extends IPSModule
     {
         $custom = (string)($Variable['VariableCustomProfile'] ?? '');
         return $custom !== '' ? $custom : (string)($Variable['VariableProfile'] ?? '');
+    }
+
+    private function HasVariableAction(array $Variable): bool
+    {
+        return (int)($Variable['VariableAction'] ?? 0) > 0
+            || (int)($Variable['VariableCustomAction'] ?? 0) > 0;
     }
 
     private function GetObjectPath(int $ObjectID): string
@@ -741,3 +750,4 @@ class SceneManager extends IPSModule
         $this->UpdateVisualizationValue(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 }
+
