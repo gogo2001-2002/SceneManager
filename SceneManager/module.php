@@ -197,7 +197,8 @@ class SceneManager extends IPSModule
         foreach ($scenes as $item) {
             $sceneVariable = 'Scene_' . (int)$item['id'];
             if ($this->GetIDForIdent($sceneVariable) > 0) {
-                $this->SetValue($sceneVariable, $this->ReadPropertyBoolean('ResetExecutionVariable') ? false : ((int)$item['id'] === $SceneID));
+                // Scene variables are momentary triggers: always return every scene switch to false.
+                $this->SetValue($sceneVariable, false);
             }
         }
         $this->PushVisualizationState(sprintf($this->Translate('Scene "%s" executed'), $sceneName));
