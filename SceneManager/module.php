@@ -92,7 +92,9 @@ class SceneManager extends IPSModule
         $this->SendDebug('RequestAction', "Ident: {$Ident}, Value: " . json_encode($Value), 0);
 
         if ($Ident === 'Mode') {
-            $this->SetValue('Mode', (int)$Value);
+            $modeId = $this->GetIDForIdent('Mode');
+            $modeValue = $this->ValidateActionValue($modeId, $Value);
+            $this->SetValue('Mode', (int)$modeValue);
             $this->PushVisualizationState();
             return;
         }
