@@ -385,11 +385,7 @@ class SceneManager extends IPSModule
             if ($position === false) {
                 continue;
             }
-            $info = $this->GetActionVariableInfo($varId);
-            if ($info['profileReadOnly']) {
-                continue;
-            }
-            $matches[] = $info;
+            $matches[] = $this->GetActionVariableInfo($varId);
             if (count($matches) >= $limit) {
                 break;
             }
@@ -501,9 +497,6 @@ class SceneManager extends IPSModule
         $profileName = $this->GetEffectiveProfileName($variable);
         if ($profileName !== '' && IPS_VariableProfileExists($profileName)) {
             $profile = IPS_GetVariableProfile($profileName);
-            if (!empty($profile['IsReadOnly'])) {
-                throw new InvalidArgumentException("Profile {$profileName} is read-only.");
-            }
             $associations = $profile['Associations'] ?? [];
             if ($type === 1 || $type === 2) {
                 $numeric = (float)$value;
