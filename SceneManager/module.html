@@ -133,10 +133,10 @@ function renderDeviceCatalog(){
   if(!group){activeCatalogCategory=null;renderDeviceCatalog();return;}
   document.getElementById('activeCategoryTitle').textContent=displayCategoryLabel(group);
   const query=document.getElementById('deviceSearch').value.trim().toLocaleLowerCase('de-DE');
-  const items=(group.items||[]).filter(item=>!query||((item.selectionLabel||item.name||'')+' '+(item.path||'')).toLocaleLowerCase('de-DE').includes(query));
+  const items=(group.items||[]).slice().sort((a,b)=>String(a.selectionLabel||a.name||'').localeCompare(String(b.selectionLabel||b.name||''),'de-DE',{sensitivity:'base'})).filter(item=>!query||((item.selectionLabel||item.name||'')+' '+(item.path||'')).toLocaleLowerCase('de-DE').includes(query));
   const html=items.map(item=>{
       const id=Number(item.variableID),checked=selectedDeviceIds.has(String(id));
-      return '<label class="catalog-item"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleCatalogSelection('+id+',this.checked)"><span><span class="catalog-label">'+escapeHtml(item.selectionLabel||item.name||('Variable '+id))+'</span><span class="catalog-path">'+escapeHtml(item.path||'')+'</span></span></label>';
+      return '<label class="catalog-item"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleCatalogSelection('+id+',this.checked)"><span class="catalog-label">'+escapeHtml(item.selectionLabel||item.name||('Variable '+id))+'</span></label>';
   }).join('');
   box.innerHTML=html||'<div class="empty">Keine passenden Geräte in dieser Kategorie gefunden.</div>';
   updateSelectionCount();
@@ -172,7 +172,7 @@ function renderTargets(){
     }else{
       input='<input type="text" value="'+escapeHtml(target.value)+'" onchange="setTargetValue('+id+',this.value)">';
     }
-    return '<div class="target"><div class="target-head"><div class="target-title">'+escapeHtml(target.name||target.path||('Variable '+id))+'<span class="target-type">'+escapeHtml(target.path||'')+'</span></div><button class="btn icon" title="Aus Szene entfernen" onclick="removeDevice('+id+')">✕</button></div><div class="target-value">'+input+'</div></div>';
+    return '<div class="target"><div class="target-head"><div class="target-title">'+escapeHtml(target.selectionLabel||target.name||target.path||('Variable '+id))+'</div><button class="btn icon" title="Aus Szene entfernen" onclick="removeDevice('+id+')">✕</button></div><div class="target-value">'+input+'</div></div>';
   }).join('');
 }
 function sameValue(a,b){
