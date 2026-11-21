@@ -1,1043 +1,229 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SceneManager</title>
-    <style>
-        :root {
-            --bg-color: #1a1e24;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --text-color: #e5e7eb;
-            --text-muted: #9ca3af;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --success: #10b981;
-            --success-hover: #059669;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --radius: 12px;
-            --transition: all 0.2s ease-in-out;
-        }
-
-        @media (prefers-color-scheme: light) {
-            :root {
-                --bg-color: #f3f4f6;
-                --card-bg: #ffffff;
-                --card-border: rgba(0, 0, 0, 0.08);
-                --text-color: #1f2937;
-                --text-muted: #6b7280;
-                --primary: #2563eb;
-                --primary-hover: #1d4ed8;
-            }
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        body {
-            background-color: transparent;
-            color: var(--text-color);
-            padding: 14px;
-            font-size: 14px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--card-border);
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header-title {
-            font-size: 17px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .active-badge {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 9999px;
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .mode-toggle {
-            display: inline-flex;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 2px;
-            border: 1px solid var(--card-border);
-        }
-
-        .mode-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 5px 12px;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .mode-btn.active {
-            background: var(--primary);
-            color: #ffffff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-
-        .mode-btn.save-active {
-            background: var(--danger);
-            color: #ffffff;
-        }
-
-        .btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-color);
-            border: 1px solid var(--card-border);
-            padding: 7px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: var(--transition);
-        }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.16);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: #ffffff;
-            border-color: transparent;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: #ffffff;
-            border-color: transparent;
-        }
-
-        .btn-success:hover {
-            background: var(--success-hover);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: #ffffff;
-            border-color: transparent;
-        }
-
-        .btn-danger:hover {
-            background: var(--danger-hover);
-        }
-
-        .btn-icon {
-            padding: 6px 9px;
-            font-size: 13px;
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, var(--primary), #2563eb);
-            color: #ffffff;
-            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
-            border: none;
-            padding: 6px 14px;
-            font-size: 13px;
-        }
-
-        .btn-add:hover {
-            filter: brightness(1.1);
-        }
-
-        /* Grid & Cards */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 12px;
-        }
-
-        .scene-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            padding: 14px;
-            transition: var(--transition);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
-
-        .scene-card:hover {
-            border-color: rgba(59, 130, 246, 0.4);
-        }
-
-        .scene-card.active-scene {
-            border-color: var(--success);
-            background: linear-gradient(145deg, var(--card-bg), rgba(16, 185, 129, 0.08));
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-menu {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .card-actions .btn-main {
-            flex: 1;
-        }
-
-        .devices-summary {
-            font-size: 11px;
-            color: var(--text-muted);
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .device-pill {
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: rgba(0, 0, 0, 0.15);
-            border: 1px solid var(--card-border);
-        }
-
-        /* Modal Overlay */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 14px;
-        }
-
-        .modal-overlay.open {
-            display: flex;
-        }
-
-        .modal-box {
-            background: #1e242d;
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            width: 100%;
-            max-width: 520px;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-            animation: modalFadeIn 0.2s ease-out;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.96); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .modal-header {
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .modal-body {
-            padding: 16px 18px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .modal-footer {
-            padding: 12px 18px;
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-input {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid var(--card-border);
-            color: var(--text-color);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            width: 100%;
-        }
-
-        .form-input:focus {
-            border-color: var(--primary);
-        }
-
-        .icon-picker {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .icon-opt {
-            padding: 6px 10px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            cursor: pointer;
-            font-size: 16px;
-            transition: var(--transition);
-        }
-
-        .icon-opt:hover {
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .icon-opt.selected {
-            background: var(--primary);
-            border-color: var(--primary);
-            transform: scale(1.05);
-        }
-
-        /* Device Configuration in Modal */
-        .devices-box {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 4px;
-        }
-
-        .device-row {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            transition: var(--transition);
-        }
-
-        .device-row.disabled {
-            opacity: 0.45;
-        }
-
-        .device-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .device-title {
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .device-type-badge {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .device-toggle-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .device-ctrl {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-top: 2px;
-        }
-
-        /* Toggle Switches */
-        .toggle-switch {
-            display: inline-flex;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid var(--card-border);
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .toggle-opt {
-            padding: 5px 12px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: var(--transition);
-        }
-
-        .toggle-opt.selected {
-            background: var(--primary);
-            color: #ffffff;
-        }
-
-        /* Shutter Slider & Controls */
-        .slider-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .shutter-slider {
-            flex: 1;
-            height: 6px;
-            border-radius: 3px;
-            outline: none;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .slider-val {
-            font-size: 12px;
-            font-weight: 700;
-            min-width: 38px;
-            text-align: right;
-        }
-
-        .shutter-presets {
-            display: flex;
-            gap: 4px;
-        }
-
-        .preset-btn {
-            font-size: 10px;
-            padding: 4px 6px;
-            border-radius: 4px;
-            border: 1px solid var(--card-border);
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
-        .preset-btn:hover {
-            color: var(--text-color);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Toast */
-        #toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #111827;
-            color: #ffffff;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-size: 13px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 2000;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        #toast.show {
-            opacity: 1;
-        }
-
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 36px 20px;
-            color: var(--text-muted);
-            font-size: 13px;
-            border: 1px dashed var(--card-border);
-            border-radius: var(--radius);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Szenen</title>
+<style>
+:root{color-scheme:dark;--bg:#111827;--card:#1f2937;--border:#374151;--muted:#9ca3af;--text:#f3f4f6;--accent:#f59e0b;--blue:#3b82f6;--red:#ef4444;--green:#10b981}
+*{box-sizing:border-box}[hidden]{display:none!important}html,body{margin:0;background:transparent;color:var(--text);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}body{padding:12px}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}
+.shell{max-width:920px;margin:0 auto}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 2px 14px}.title{font-size:20px;font-weight:750;display:flex;align-items:center;gap:9px}.sub{font-size:12px;color:var(--muted);margin-top:2px}
+.btn{border:1px solid var(--border);background:#263244;padding:8px 12px;border-radius:10px;font-weight:650;transition:.15s}.btn:hover{filter:brightness(1.15)}.btn.primary{background:var(--blue);border-color:transparent}.btn.success{background:#059669;border-color:transparent}.btn.danger{background:#7f1d1d;border-color:#991b1b}.btn.small{padding:6px 9px;font-size:12px}.btn.icon{padding:5px 8px}
+.grid{display:grid;grid-template-columns:1fr;gap:7px}.scene-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:7px 9px;min-height:54px}.scene-row.active{border-color:#10b98180;box-shadow:0 0 0 1px #10b98130}.scene-icon{font-size:21px;width:30px;flex:none;text-align:center}.scene-name{font-size:15px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.scene-actions{display:flex;align-items:center;gap:6px;flex:none}.scene-actions .btn{width:38px;height:38px;padding:0;display:grid;place-items:center;font-size:18px;line-height:1}.scene-actions .btn.execute{background:var(--blue);border-color:transparent}.scene-actions .btn.delete{color:#fecaca}
+.empty{border:1px dashed var(--border);border-radius:12px;padding:13px;color:var(--muted);text-align:center;font-size:12px}
+.actions{display:flex;gap:7px}.actions .primary{flex:1}
+.modal-wrap{display:none;position:fixed;inset:0;background:#0009;z-index:99;padding:12px;align-items:flex-start;justify-content:center;overflow:auto}.modal-wrap.open{display:flex}.modal{background:#111827;border:1px solid #4b5563;border-radius:16px;width:min(760px,100%);max-height:calc(100vh - 24px);display:flex;flex-direction:column;box-shadow:0 25px 70px #0008}.modal-head,.modal-foot{padding:12px 14px;border-bottom:1px solid #374151;display:flex;align-items:center;justify-content:space-between;gap:9px}.modal-foot{border-bottom:0;border-top:1px solid #374151;justify-content:flex-end}.modal-title{font-weight:750;font-size:16px}.modal-body{padding:13px;overflow:auto;display:grid;gap:13px;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}.modal-body::-webkit-scrollbar{width:9px}.modal-body::-webkit-scrollbar-track{background:#0b1220;border-radius:8px}.modal-body::-webkit-scrollbar-thumb{background:#526176;border:2px solid #0b1220;border-radius:8px}
+.field{display:grid;gap:5px}.field label,.small-label{font-size:11px;color:#cbd5e1;font-weight:650}.input{width:100%;background:#1f2937;border:1px solid #4b5563;border-radius:9px;padding:9px 10px;outline:none}.input:focus{border-color:#60a5fa;box-shadow:0 0 0 2px #3b82f633}
+.search-results{display:grid;gap:6px;max-height:190px;overflow:auto}.result{border:1px solid var(--border);background:#1f2937;border-radius:10px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}.result:hover{border-color:#60a5fa}.result-name{font-size:12px;font-weight:650}.result-path{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+.device-picker{display:grid;gap:9px;border:1px solid var(--border);background:#151e2b;border-radius:12px;padding:10px}.category-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.category-choice{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;padding:10px 11px}.picker-header{display:flex;align-items:center;gap:8px}.picker-header .btn{flex:none}.picker-title{font-size:13px;font-weight:750;flex:1}.catalog-items{display:grid;max-height:42vh;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:9px}.catalog-items::-webkit-scrollbar{width:9px}.catalog-items::-webkit-scrollbar-track{background:#0b1220}.catalog-items::-webkit-scrollbar-thumb{background:#526176;border:2px solid #0b1220;border-radius:8px}.catalog-item{display:flex;align-items:flex-start;gap:9px;padding:8px 9px;border-top:1px solid #ffffff0d;cursor:pointer}.catalog-item:first-child{border-top:0}.catalog-item:hover{background:#ffffff08}.catalog-item input{margin:2px 0 0;accent-color:#3b82f6}.catalog-label{font-size:12px;font-weight:650}.catalog-path{display:block;font-size:10px;color:var(--muted);overflow-wrap:anywhere}.catalog-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}.icon-select{display:flex;gap:8px;align-items:center}.icon-select select{width:100%;background:#1f2937;border:1px solid #4b5563;border-radius:9px;padding:9px 10px}
+.target-list{display:grid;gap:6px}.target{background:#1b2533;border:1px solid #374151;border-radius:10px;padding:6px 7px;display:grid;grid-template-columns:24px minmax(0,1fr) minmax(72px,110px) 34px;align-items:center;gap:7px}.target-icon{font-size:17px;width:24px;text-align:center}.target-title{font-size:12px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.target-value{min-width:0}.target-value input,.target-value select{width:100%;min-width:0;height:34px;background:#111827;border:1px solid #4b5563;border-radius:8px;padding:5px 4px}.target-remove{width:34px;height:34px;display:grid;place-items:center;padding:0}
+.profile-note{font-size:10px;color:#94a3b8;margin-top:4px}.muted{color:var(--muted)}.toast{position:fixed;bottom:12px;left:50%;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:#0f172a;border:1px solid #475569;border-radius:10px;padding:9px 13px;font-size:12px;z-index:110;transition:.2s;max-width:90vw}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:520px){body{padding:8px}.top{align-items:flex-start}.top .btn{padding:7px 9px;font-size:12px}.grid{grid-template-columns:1fr}.modal-wrap{padding:6px}.modal{max-height:calc(100vh - 12px)}.scene{padding:12px}}
+</style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="header-left">
-            <div class="header-title">
-                <span>🎬 Szenen</span>
-                <span id="activeBadge" class="active-badge" style="display: none;">
-                    ● <span id="activeSceneName">Keine</span>
-                </span>
-            </div>
+<div class="shell">
+  <header class="top">
+    <div><div class="title">🎬 Szenen</div><div class="sub">Geräte und Zielwerte werden je Szene festgelegt.</div></div>
+    <button class="btn primary" onclick="openSceneEditor()">＋ Neue Szene</button>
+  </header>
+  <div id="scenesGrid" class="grid"></div>
+</div>
+<div id="sceneModal" class="modal-wrap" onclick="if(event.target===this)closeSceneEditor()">
+  <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <header class="modal-head"><div class="modal-title" id="modalTitle">Szene</div><button class="btn icon" onclick="closeSceneEditor()" aria-label="Schließen">✕</button></header>
+    <div class="modal-body">
+      <div class="field"><label for="sceneName">Name der Szene</label><input class="input" id="sceneName" maxlength="80" placeholder="z. B. Feierabend"></div>
+      <div class="field"><label for="sceneIcon">Symbol auswählen</label><div class="icon-select"><span id="sceneIconPreview" aria-hidden="true">🎬</span><select id="sceneIcon" onchange="updateIconPreview()"><option value="🎬">🎬 Film</option><option value="🏠">🏠 Zuhause</option><option value="🌙">🌙 Nacht</option><option value="☀️">☀️ Tag</option><option value="🌅">🌅 Morgen</option><option value="💡">💡 Licht</option><option value="🛋️">🛋️ Wohnen</option><option value="🛏️">🛏️ Schlafen</option><option value="🌡️">🌡️ Klima</option><option value="🚪">🚪 Tür</option><option value="🎉">🎉 Feier</option><option value="🔒">🔒 Abwesend</option><option value="✨">✨ Eigenes</option></select></div></div>
+      <div class="field">
+        <div class="small-label">Geräte dieser Szene und Zielwerte</div>
+        <div id="targetList" class="target-list"></div>
+        <button type="button" class="btn primary" onclick="openDevicePicker()">＋ Geräte hinzufügen</button>
+        <div id="devicePicker" class="device-picker" hidden>
+          <div id="categoryPicker"></div>
+          <div id="categoryDevicePicker" hidden>
+            <div class="picker-header"><button type="button" class="btn small" onclick="showDeviceCategories()">← Kategorien</button><div id="activeCategoryTitle" class="picker-title"></div></div>
+            <input class="input" id="deviceSearch" autocomplete="off" placeholder="Gerät oder Raum in dieser Kategorie filtern">
+            <div id="searchHint" class="profile-note">Mehrere Geräte anhaken, dann „Übernehmen“ wählen. Die Liste lässt sich scrollen.</div>
+            <div id="deviceCatalog" class="catalog-items"></div>
+            <div class="catalog-actions"><span id="selectionCount" class="profile-note">0 Geräte ausgewählt</span><button type="button" class="btn success" onclick="applySelectedDevices()">Übernehmen</button></div>
+          </div>
         </div>
-        <div class="header-actions">
-            <button class="btn btn-add" onclick="openNewSceneModal()">➕ Neue Szene</button>
-            <div class="mode-toggle">
-                <button id="btnModeExecute" class="mode-btn active" onclick="setMode(0)">Ausführen</button>
-                <button id="btnModeSave" class="mode-btn" onclick="setMode(1)">Speichern</button>
-            </div>
-        </div>
+      </div>
     </div>
-
-    <div id="scenesGrid" class="grid">
-        <div class="empty-state">
-            <span>Lade Szenen...</span>
-        </div>
-    </div>
-
-    <!-- Modal: Neue Szene / Szene bearbeiten -->
-    <div id="sceneModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <span id="modalTitle">➕ Neue Szene anlegen</span>
-                <button class="btn btn-icon" onclick="closeModal()">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Szenenname</label>
-                    <input type="text" id="modalSceneName" class="form-input" placeholder="z. B. Fernsehabend, Lesen, Gemütlich...">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Icon</label>
-                    <div class="icon-picker" id="modalIconPicker">
-                        <div class="icon-opt selected" data-icon="Film" onclick="selectIcon('Film')">🍿 Film</div>
-                        <div class="icon-opt" data-icon="Sun" onclick="selectIcon('Sun')">☀️ Tag</div>
-                        <div class="icon-opt" data-icon="Moon" onclick="selectIcon('Moon')">🌙 Nacht</div>
-                        <div class="icon-opt" data-icon="Sofa" onclick="selectIcon('Sofa')">🛋️ Sofa</div>
-                        <div class="icon-opt" data-icon="Food" onclick="selectIcon('Food')">🍽️ Essen</div>
-                        <div class="icon-opt" data-icon="Party" onclick="selectIcon('Party')">🎉 Party</div>
-                        <div class="icon-opt" data-icon="Lightbulb" onclick="selectIcon('Lightbulb')">💡 Licht</div>
-                        <div class="icon-opt" data-icon="Fire" onclick="selectIcon('Fire')">🔥 Kamin</div>
-                        <div class="icon-opt" data-icon="Book" onclick="selectIcon('Book')">📖 Lesen</div>
-                        <div class="icon-opt" data-icon="Power" onclick="selectIcon('Power')">⭕ Aus</div>
-                    </div>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
-                    <span class="form-label">Gerätekombination</span>
-                    <button type="button" class="btn btn-icon" style="font-size: 11px; padding: 4px 8px;" onclick="applyCurrentLiveToModal()">
-                        ⚡ Live-Raumwerte übernehmen
-                    </button>
-                </div>
-
-                <div class="devices-box" id="modalDevicesBox">
-                    <!-- Populated dynamically -->
-                </div>
-
-                <div style="padding-top: 6px;">
-                    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: var(--text-muted);">
-                        <input type="checkbox" id="modalCreateSaveVar">
-                        <span>Separate Speichern-Taste als Variable in Visu anlegen</span>
-                    </label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" onclick="closeModal()">Abbrechen</button>
-                <button class="btn btn-success" onclick="saveModalScene()">💾 Szene speichern</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast"></div>
-
-    <script>
-        let currentState = {
-            mode: 0,
-            activeSceneId: 0,
-            scenes: [],
-            devices: [],
-            sceneValues: {}
-        };
-        let currentModalSceneId = null; // null = new scene, number = editing existing scene
-        let selectedIcon = 'Film';
-
-        window.handleMessage = function(data) {
-            try {
-                const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-                if (!parsed) return;
-
-                if (parsed.mode !== undefined) currentState.mode = parsed.mode;
-                if (parsed.activeSceneId !== undefined) currentState.activeSceneId = parsed.activeSceneId;
-                if (parsed.scenes) currentState.scenes = parsed.scenes;
-                if (parsed.devices) currentState.devices = parsed.devices;
-                if (parsed.sceneValues) currentState.sceneValues = parsed.sceneValues;
-
-                renderUI();
-
-                if (parsed.toast) {
-                    showToast(parsed.toast);
-                }
-            } catch (e) {
-                console.error("handleMessage error:", e);
-            }
-        };
-
-        function request(ident, value) {
-            if (typeof window.requestAction === 'function') {
-                window.requestAction(ident, value);
-            } else {
-                console.log("requestAction:", ident, value);
-            }
-        }
-
-        function setMode(mode) {
-            currentState.mode = mode;
-            request('Mode', mode);
-            updateModeButtons();
-        }
-
-        function updateModeButtons() {
-            const btnExec = document.getElementById('btnModeExecute');
-            const btnSave = document.getElementById('btnModeSave');
-            if (currentState.mode === 1) {
-                btnExec.className = 'mode-btn';
-                btnSave.className = 'mode-btn save-active active';
-            } else {
-                btnExec.className = 'mode-btn active';
-                btnSave.className = 'mode-btn';
-            }
-        }
-
-        function executeScene(id) {
-            if (currentState.mode === 1) {
-                saveScene(id);
-            } else {
-                request('ExecuteScene', id);
-            }
-        }
-
-        function saveScene(id) {
-            request('SaveScene', id);
-        }
-
-        function deleteScene(id, name) {
-            if (confirm(`Möchtest du die Szene "${name}" wirklich löschen?`)) {
-                request('DeleteScene', id);
-            }
-        }
-
-        // --- Modal Dialog for Creating & Editing Scenes ---
-
-        function openNewSceneModal() {
-            currentModalSceneId = null;
-            document.getElementById('modalTitle').textContent = '➕ Neue Szene anlegen';
-            document.getElementById('modalSceneName').value = '';
-            document.getElementById('modalCreateSaveVar').checked = false;
-            selectIcon('Film');
-
-            renderModalDevices({});
-            document.getElementById('sceneModal').classList.add('open');
-        }
-
-        function openEditSceneModal(sceneId) {
-            currentModalSceneId = sceneId;
-            const scene = (currentState.scenes || []).find(s => parseInt(s.id, 10) === parseInt(sceneId, 10));
-            if (!scene) return;
-
-            document.getElementById('modalTitle').textContent = `✏️ Szene "${scene.name}" bearbeiten`;
-            document.getElementById('modalSceneName').value = scene.name || '';
-            document.getElementById('modalCreateSaveVar').checked = Boolean(scene.createSaveVariable);
-            selectIcon(scene.icon || 'Film');
-
-            const sVal = (currentState.sceneValues || {})[String(sceneId)] || scene.targets || {};
-            renderModalDevices(sVal);
-
-            document.getElementById('sceneModal').classList.add('open');
-        }
-
-        function closeModal() {
-            document.getElementById('sceneModal').classList.remove('open');
-        }
-
-        function selectIcon(icon) {
-            selectedIcon = icon;
-            const opts = document.querySelectorAll('#modalIconPicker .icon-opt');
-            opts.forEach(el => {
-                el.classList.toggle('selected', el.getAttribute('data-icon') === icon);
-            });
-        }
-
-        function renderModalDevices(existingTargets) {
-            const container = document.getElementById('modalDevicesBox');
-            const devices = currentState.devices || [];
-
-            if (devices.length === 0) {
-                container.innerHTML = `
-                    <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 14px; border: 1px dashed var(--card-border); border-radius: 8px;">
-                        Noch keine Geräte in der Modul-Konfiguration hinterlegt.<br>
-                        Bitte in der Symcon-Konsole unter 'Geräte' Lichter, Rollos etc. hinzufügen.
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = devices.map(dev => {
-                const dId = String(dev.id);
-                const target = existingTargets[dId] || { enabled: true, value: dev.currentValue ?? false };
-                const isEnabled = target.enabled !== false;
-                const type = dev.type || 'switch';
-
-                let ctrlHtml = '';
-                if (type === 'shutter') {
-                    const pos = (target.value !== undefined) ? parseInt(target.value, 10) : (dev.currentValue ?? 0);
-                    ctrlHtml = `
-                        <div class="slider-wrapper">
-                            <div class="shutter-presets">
-                                <button type="button" class="preset-btn" onclick="setModalShutterVal('${dId}', 0)">0%</button>
-                                <button type="button" class="preset-btn" onclick="setModalShutterVal('${dId}', 50)">50%</button>
-                                <button type="button" class="preset-btn" onclick="setModalShutterVal('${dId}', 100)">100%</button>
-                            </div>
-                            <input type="range" min="0" max="100" value="${pos}" id="modal_shutter_${dId}" class="shutter-slider"
-                                oninput="document.getElementById('modal_shutter_val_${dId}').textContent = this.value + '%'">
-                            <span id="modal_shutter_val_${dId}" class="slider-val">${pos}%</span>
-                        </div>
-                    `;
-                } else {
-                    const boolVal = Boolean(target.value);
-                    ctrlHtml = `
-                        <div class="toggle-switch toggle-group-modal-${dId}">
-                            <div class="toggle-opt ${!boolVal ? 'selected' : ''}" data-val="false" onclick="setModalToggleVal('${dId}', false)">Aus</div>
-                            <div class="toggle-opt ${boolVal ? 'selected' : ''}" data-val="true" onclick="setModalToggleVal('${dId}', true)">An</div>
-                        </div>
-                    `;
-                }
-
-                return `
-                    <div id="modal_dev_row_${dId}" class="device-row ${!isEnabled ? 'disabled' : ''}">
-                        <div class="device-info">
-                            <label class="device-toggle-row">
-                                <input type="checkbox" id="modal_dev_en_${dId}" ${isEnabled ? 'checked' : ''} onchange="toggleModalDeviceEnabled('${dId}')">
-                                <span class="device-title">
-                                    ${getTypeIcon(type)} ${escapeHtml(dev.name || 'Gerät ' + dId)}
-                                </span>
-                            </label>
-                            <span class="device-type-badge">${getTypeLabel(type)}</span>
-                        </div>
-                        <div class="device-ctrl">
-                            ${ctrlHtml}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function toggleModalDeviceEnabled(devId) {
-            const enCheck = document.getElementById(`modal_dev_en_${devId}`);
-            const row = document.getElementById(`modal_dev_row_${devId}`);
-            if (enCheck && row) {
-                row.classList.toggle('disabled', !enCheck.checked);
-            }
-        }
-
-        function setModalToggleVal(devId, val) {
-            const group = document.querySelectorAll(`.toggle-group-modal-${devId} .toggle-opt`);
-            group.forEach(el => {
-                el.classList.toggle('selected', el.getAttribute('data-val') === String(val));
-            });
-        }
-
-        function setModalShutterVal(devId, val) {
-            const slider = document.getElementById(`modal_shutter_${devId}`);
-            const label = document.getElementById(`modal_shutter_val_${devId}`);
-            if (slider) slider.value = val;
-            if (label) label.textContent = `${val}%`;
-        }
-
-        function applyCurrentLiveToModal() {
-            (currentState.devices || []).forEach(dev => {
-                const dId = String(dev.id);
-                const enCheck = document.getElementById(`modal_dev_en_${dId}`);
-                if (enCheck) enCheck.checked = true;
-                toggleModalDeviceEnabled(dId);
-
-                if (dev.type === 'shutter') {
-                    setModalShutterVal(dId, dev.currentValue ?? 0);
-                } else {
-                    setModalToggleVal(dId, Boolean(dev.currentValue));
-                }
-            });
-            showToast('Aktuelle Live-Werte in Formular übernommen');
-        }
-
-        function saveModalScene() {
-            const nameInput = document.getElementById('modalSceneName');
-            const name = (nameInput.value || '').trim();
-            if (!name) {
-                alert('Bitte gib einen Szenennamen ein.');
-                nameInput.focus();
-                return;
-            }
-
-            const createSaveVar = document.getElementById('modalCreateSaveVar').checked;
-
-            const targets = {};
-            (currentState.devices || []).forEach(dev => {
-                const dId = String(dev.id);
-                const enCheck = document.getElementById(`modal_dev_en_${dId}`);
-                const isEnabled = enCheck ? enCheck.checked : true;
-
-                if (dev.type === 'shutter') {
-                    const slider = document.getElementById(`modal_shutter_${dId}`);
-                    const pos = slider ? parseInt(slider.value, 10) : 0;
-                    targets[dId] = { enabled: isEnabled, mode: 'position', value: pos };
-                } else {
-                    const activeOpt = document.querySelector(`.toggle-group-modal-${dId} .selected`);
-                    const val = activeOpt ? (activeOpt.getAttribute('data-val') === 'true') : false;
-                    targets[dId] = { enabled: isEnabled, value: val };
-                }
-            });
-
-            if (currentModalSceneId === null) {
-                // Create New Scene
-                request('CreateScene', JSON.stringify({
-                    name: name,
-                    icon: selectedIcon,
-                    targets: targets,
-                    createSaveVariable: createSaveVar
-                }));
-            } else {
-                // Update Existing Scene
-                request('UpdateScene', JSON.stringify({
-                    sceneId: currentModalSceneId,
-                    name: name,
-                    icon: selectedIcon,
-                    targets: targets,
-                    createSaveVariable: createSaveVar
-                }));
-            }
-
-            closeModal();
-        }
-
-        // --- Render Main Visu UI ---
-
-        function renderUI() {
-            updateModeButtons();
-
-            const grid = document.getElementById('scenesGrid');
-            const activeBadge = document.getElementById('activeBadge');
-            const activeSceneName = document.getElementById('activeSceneName');
-
-            const scenes = currentState.scenes || [];
-            const devices = currentState.devices || [];
-            const sceneValues = currentState.sceneValues || {};
-
-            let activeFound = null;
-            if (currentState.activeSceneId) {
-                activeFound = scenes.find(s => parseInt(s.id, 10) === parseInt(currentState.activeSceneId, 10));
-            }
-
-            if (activeFound) {
-                activeBadge.style.display = 'inline-flex';
-                activeSceneName.textContent = activeFound.name;
-            } else {
-                activeBadge.style.display = 'none';
-            }
-
-            if (scenes.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <span style="font-size: 24px;">🎬</span>
-                        <span>Noch keine Szenen vorhanden. Klicke oben auf <strong>➕ Neue Szene</strong>, um deine erste Szene für beliebige Geräte anzulegen.</span>
-                        <button class="btn btn-add" onclick="openNewSceneModal()">➕ Jetzt erste Szene anlegen</button>
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = scenes.map(scene => {
-                const sId = parseInt(scene.id, 10);
-                const isActive = (sId === parseInt(currentState.activeSceneId, 10));
-                const sVal = sceneValues[String(sId)] || scene.targets || {};
-
-                // Generate device summary pills
-                const activeDevicePills = devices
-                    .filter(d => sVal[String(d.id)] && sVal[String(d.id)].enabled !== false)
-                    .map(d => `<span class="device-pill">${getTypeIcon(d.type)} ${escapeHtml(d.name)}</span>`)
-                    .join('');
-
-                return `
-                    <div class="scene-card ${isActive ? 'active-scene' : ''}">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <span>${getSceneIcon(scene.icon)}</span>
-                                <span>${escapeHtml(scene.name)}</span>
-                            </div>
-                            <div class="card-menu">
-                                ${isActive ? '<span class="active-badge">Aktiv</span>' : ''}
-                                <button class="btn btn-icon" title="Szene anpassen & Gerätekombination bearbeiten" onclick="openEditSceneModal(${sId})">
-                                    ✏️
-                                </button>
-                                <button class="btn btn-icon" title="Szene löschen" onclick="deleteScene(${sId}, '${escapeHtml(scene.name)}')">
-                                    🗑️
-                                </button>
-                            </div>
-                        </div>
-
-                        ${activeDevicePills ? `<div class="devices-summary">${activeDevicePills}</div>` : ''}
-
-                        <div class="card-actions">
-                            <button class="btn btn-main ${currentState.mode === 1 ? 'btn-danger' : 'btn-primary'}" onclick="executeScene(${sId})">
-                                ${currentState.mode === 1 ? '💾 Jetzt Speichern' : '▶ Starten'}
-                            </button>
-                            <button class="btn btn-icon" title="Aktuellen Raum-Zustand in diese Szene übernehmen" onclick="saveScene(${sId})">
-                                💾
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function getSceneIcon(icon) {
-            if (!icon) return '🎬';
-            const i = icon.toLowerCase();
-            if (i.includes('sun') || i.includes('tag')) return '☀️';
-            if (i.includes('moon') || i.includes('nacht')) return '🌙';
-            if (i.includes('film') || i.includes('kino') || i.includes('movie')) return '🍿';
-            if (i.includes('sofa') || i.includes('gemuet') || i.includes('wohn')) return '🛋️';
-            if (i.includes('food') || i.includes('essen')) return '🍽️';
-            if (i.includes('party')) return '🎉';
-            if (i.includes('light') || i.includes('lamp')) return '💡';
-            if (i.includes('fire') || i.includes('kamin')) return '🔥';
-            if (i.includes('book') || i.includes('lese')) return '📖';
-            if (i.includes('power') || i.includes('off') || i.includes('aus')) return '⭕';
-            return '🎬';
-        }
-
-        function getTypeIcon(type) {
-            switch (type) {
-                case 'light': return '💡';
-                case 'switch': return '🔌';
-                case 'shutter': return '🪟';
-                case 'climate': return '❄️';
-                default: return '⚡';
-            }
-        }
-
-        function getTypeLabel(type) {
-            switch (type) {
-                case 'light': return 'Licht';
-                case 'switch': return 'Schalten';
-                case 'shutter': return 'Rollo';
-                case 'climate': return 'Klima';
-                default: return 'Gerät';
-            }
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        function showToast(text) {
-            const t = document.getElementById('toast');
-            t.textContent = text;
-            t.className = 'show';
-            setTimeout(() => { t.className = ''; }, 3200);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            request('GetTileState', '');
-        });
-    </script>
+    <footer class="modal-foot"><button class="btn" onclick="closeSceneEditor()">Abbrechen</button><button class="btn success" onclick="saveSceneEditor()">💾 Szene speichern</button></footer>
+  </section>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+let currentState={scenes:[],sceneValues:{},deviceCatalog:[],activeSceneId:0};
+let editorSceneId=null,editorTargets={},selectedDeviceIds=new Set(),activeCatalogCategory=null,devicePickerOpen=false,toastTimer=0;
+window.handleMessage=function(data){
+  try{
+    const state=typeof data==='string'?JSON.parse(data):data;
+    if(!state)return;
+    currentState={...currentState,...state};
+    renderScenes();
+    renderDeviceCatalog();
+    if(document.getElementById('sceneModal').classList.contains('open'))renderTargets();
+    if(state.toast)showToast(state.toast);
+  }catch(error){console.error('Szenenstatus konnte nicht gelesen werden',error);}
+};
+function request(ident,value){
+  if(typeof window.requestAction==='function')window.requestAction(ident,value);
+  else console.log('requestAction',ident,value);
+}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));}
+function sceneIcon(icon){return icon||'🎬';}
+function updateIconPreview(){document.getElementById('sceneIconPreview').textContent=document.getElementById('sceneIcon').value||'🎬';}
+function getTargets(sceneId){return (currentState.sceneValues||{})[String(sceneId)]||{};}
+function renderScenes(){
+  const grid=document.getElementById('scenesGrid');
+  const scenes=(currentState.scenes||[]).slice().sort((a,b)=>String(a.name||('Szene '+a.id)).localeCompare(String(b.name||('Szene '+b.id)),'de-DE',{sensitivity:'base',numeric:true}));
+  if(!scenes.length){grid.innerHTML='<div class="empty">Noch keine Szenen. Lege eine Szene an und wähle dafür die gewünschten Geräte aus.</div>';return;}
+  grid.innerHTML=scenes.map(scene=>{
+    const id=Number(scene.id);
+    const active=id===Number(currentState.activeSceneId);
+    const name=scene.name||('Szene '+id);
+    return '<article class="scene-row '+(active?'active':'')+'"><span class="scene-icon" aria-hidden="true">'+escapeHtml(sceneIcon(scene.icon))+'</span><div class="scene-name" title="'+escapeHtml(name)+'">'+escapeHtml(name)+'</div><div class="scene-actions"><button type="button" class="btn execute" aria-label="Szene '+escapeHtml(name)+' ausführen" title="Ausführen" onclick="request(\'ExecuteScene\','+id+')">▶</button><button type="button" class="btn" aria-label="Szene '+escapeHtml(name)+' bearbeiten" title="Bearbeiten" onclick="openSceneEditor('+id+')">✎</button><button type="button" class="btn delete" aria-label="Szene '+escapeHtml(name)+' löschen" title="Löschen" onclick="deleteScene('+id+',\''+escapeJs(name)+'\')">🗑</button></div></article>';
+  }).join('');
+}
+function escapeJs(value){return String(value??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/[\r\n]/g,' ');}
+function formatValue(value,target){
+  if(target&&Number(target.variableType)===0)return value?'Ein':'Aus';
+  if(typeof value==='boolean')return value?'Ein':'Aus';
+  if(value===null||value===undefined)return '—';
+  const suffix=target&&target.profileSuffix?(' '+target.profileSuffix):'';
+  return String(value)+suffix;
+}
+function openSceneEditor(sceneId=null){
+  editorSceneId=sceneId===null?null:Number(sceneId);
+  const scene=editorSceneId===null?null:(currentState.scenes||[]).find(item=>Number(item.id)===editorSceneId);
+  document.getElementById('modalTitle').textContent=scene?'Szene bearbeiten':'Neue Szene';
+  document.getElementById('sceneName').value=scene?(scene.name||''):'';
+  const iconSelect=document.getElementById('sceneIcon'),iconValue=scene?(scene.icon||'🎬'):'🎬';
+  if(!Array.from(iconSelect.options).some(option=>option.value===iconValue)){const option=document.createElement('option');option.value=iconValue;option.textContent=iconValue+' Aktuelles Symbol';iconSelect.appendChild(option);}
+  iconSelect.value=iconValue;updateIconPreview();
+  editorTargets=scene?JSON.parse(JSON.stringify(getTargets(editorSceneId))):{};
+  selectedDeviceIds=new Set();activeCatalogCategory=null;devicePickerOpen=false;
+  renderDeviceCatalog();renderTargets();
+  document.getElementById('sceneModal').classList.add('open');
+  document.getElementById('sceneName').focus();
+}
+function closeSceneEditor(){document.getElementById('sceneModal').classList.remove('open');editorSceneId=null;editorTargets={};selectedDeviceIds.clear();activeCatalogCategory=null;devicePickerOpen=false;}
+function displayCategoryLabel(group){return group.label==='Klima'?'Klimageräte':group.label;}
+function openDevicePicker(){devicePickerOpen=true;activeCatalogCategory=null;selectedDeviceIds.clear();renderDeviceCatalog();}
+function showDeviceCategories(){activeCatalogCategory=null;selectedDeviceIds.clear();renderDeviceCatalog();}
+function chooseCatalogCategory(label){activeCatalogCategory=label;selectedDeviceIds.clear();document.getElementById('deviceSearch').value='';renderDeviceCatalog();}
+function renderDeviceCatalog(){
+  const box=document.getElementById('deviceCatalog');if(!box)return;
+  const picker=document.getElementById('devicePicker');picker.hidden=!devicePickerOpen;
+  const groups=currentState.deviceCatalog||[];
+  const categoryPicker=document.getElementById('categoryPicker'),devicePicker=document.getElementById('categoryDevicePicker');
+  if(!devicePickerOpen){categoryPicker.innerHTML='';devicePicker.hidden=true;return;}
+  categoryPicker.hidden=Boolean(activeCatalogCategory);devicePicker.hidden=!activeCatalogCategory;
+  if(!activeCatalogCategory){
+    categoryPicker.innerHTML='<div class="profile-note">Wähle zuerst einen Bereich aus:</div><div class="category-buttons">'+groups.map(group=>'<button type="button" class="btn category-choice" onclick="chooseCatalogCategory(\''+escapeJs(group.label)+'\')"><span>'+escapeHtml(displayCategoryLabel(group))+'</span><span class="muted">'+(group.items||[]).length+'</span></button>').join('')+'</div>';
+    return;
+  }
+  const group=groups.find(item=>item.label===activeCatalogCategory);
+  if(!group){activeCatalogCategory=null;renderDeviceCatalog();return;}
+  document.getElementById('activeCategoryTitle').textContent=displayCategoryLabel(group);
+  const query=document.getElementById('deviceSearch').value.trim().toLocaleLowerCase('de-DE');
+  const items=(group.items||[]).slice().sort((a,b)=>String(a.selectionLabel||a.name||'').localeCompare(String(b.selectionLabel||b.name||''),'de-DE',{sensitivity:'base'})).filter(item=>!query||((item.selectionLabel||item.name||'')+' '+(item.path||'')).toLocaleLowerCase('de-DE').includes(query));
+  const html=items.map(item=>{
+      const id=Number(item.variableID),checked=selectedDeviceIds.has(String(id));
+      return '<label class="catalog-item"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleCatalogSelection('+id+',this.checked)"><span class="catalog-label">'+escapeHtml(item.selectionLabel||item.name||('Variable '+id))+'</span></label>';
+  }).join('');
+  box.innerHTML=html||'<div class="empty">Keine passenden Geräte in dieser Kategorie gefunden.</div>';
+  updateSelectionCount();
+}
+document.getElementById('deviceSearch').addEventListener('input',()=>renderDeviceCatalog());
+function toggleCatalogSelection(id,checked){if(checked)selectedDeviceIds.add(String(id));else selectedDeviceIds.delete(String(id));updateSelectionCount();}
+function updateSelectionCount(){const count=selectedDeviceIds.size,el=document.getElementById('selectionCount');if(el)el.textContent=count+' '+(count===1?'Gerät':'Geräte')+' ausgewählt';}
+function applySelectedDevices(){
+  const selectedGroup=(currentState.deviceCatalog||[]).find(group=>group.label===activeCatalogCategory);
+  const byId=new Map();(selectedGroup?.items||[]).forEach(item=>byId.set(String(item.variableID),item));
+  selectedDeviceIds.forEach(id=>{const item=byId.get(id);if(item&&!editorTargets[id])editorTargets[id]={...item,value:item.currentValue};});
+  selectedDeviceIds.clear();devicePickerOpen=false;activeCatalogCategory=null;renderDeviceCatalog();renderTargets();
+}
+function getTargetCategory(target){
+  if(target.category)return String(target.category);
+  const id=Number(target.variableID);
+  for(const group of currentState.deviceCatalog||[]){if((group.items||[]).some(item=>Number(item.variableID)===id))return group.label;}
+  return '';
+}
+function targetCategorySymbol(target){
+  const category=getTargetCategory(target);
+  if(category==='Licht')return '💡';
+  if(category==='Rollos')return '🪟';
+  if(category==='Klima'||category==='Klimageräte')return '🌡️';
+  if(category==='Verbraucher')return '🔌';
+  return '⚙️';
+}
+function renderTargets(){
+  const box=document.getElementById('targetList');
+  const categoryOrder={'Licht':0,'Rollos':1,'Klima':2,'Klimageräte':2,'Verbraucher':3};
+  const entries=Object.values(editorTargets||{}).sort((a,b)=>{
+    const categoryA=getTargetCategory(a),categoryB=getTargetCategory(b);
+    const categoryDifference=(categoryOrder[categoryA]??99)-(categoryOrder[categoryB]??99);
+    if(categoryDifference!==0)return categoryDifference;
+    return String(a.selectionLabel||a.name||'').localeCompare(String(b.selectionLabel||b.name||''),'de-DE',{sensitivity:'base'});
+  });
+  if(!entries.length){box.innerHTML='<div class="empty">Noch keine Geräte in dieser Szene. Wähle sie über „Geräte hinzufügen“ aus.</div>';return;}
+  box.innerHTML=entries.map(target=>{
+    const id=Number(target.variableID),type=Number(target.variableType),associations=Array.isArray(target.associations)?target.associations:[];
+    const category=getTargetCategory(target),categoryTitle=category?displayCategoryLabel({label:category}):'Gerät';
+    let input='';
+    if(associations.length){
+      input='<select onchange="setTargetValue('+id+',this.value)">'+associations.map(item=>{
+        const value=item.Value,selected=sameValue(value,target.value);
+        return '<option value="'+escapeHtml(String(value))+'" '+(selected?'selected':'')+'>'+escapeHtml(item.Name??value)+'</option>';
+      }).join('')+'</select>';
+    }else if(type===0){
+      input='<select onchange="setTargetValue('+id+',this.value)"><option value="true" '+(target.value?'selected':'')+'>Ein</option><option value="false" '+(!target.value?'selected':'')+'>Aus</option></select>';
+    }else if(type===1||type===2){
+      const min=target.profileMin!==null&&target.profileMin!==undefined?' min="'+escapeHtml(target.profileMin)+'"':'';
+      const max=target.profileMax!==null&&target.profileMax!==undefined?' max="'+escapeHtml(target.profileMax)+'"':'';
+      const step=Number(target.profileStep)>0?' step="'+escapeHtml(target.profileStep)+'"':' step="any"';
+      input='<input type="number" value="'+escapeHtml(target.value)+'"'+min+max+step+' onchange="setTargetValue('+id+',this.value)">';
+    }else{
+      input='<input type="text" value="'+escapeHtml(target.value)+'" onchange="setTargetValue('+id+',this.value)">';
+    }
+    return '<div class="target"><span class="target-icon" aria-hidden="true" title="'+escapeHtml(categoryTitle)+'">'+targetCategorySymbol(target)+'</span><div class="target-title" title="'+escapeHtml(target.selectionLabel||target.name||('Variable '+id))+'">'+escapeHtml(target.selectionLabel||target.name||target.path||('Variable '+id))+'</div><div class="target-value">'+input+'</div><button type="button" class="btn icon target-remove" aria-label="Aus Szene entfernen" title="Aus Szene entfernen" onclick="removeDevice('+id+')">✕</button></div>';
+  }).join('');
+}
+function sameValue(a,b){
+  if(typeof a==='boolean'||typeof b==='boolean')return boolValue(a)===boolValue(b);
+  if(a!==null&&b!==null&&a!==undefined&&b!==undefined&&a!==''&&b!=='')return Number(a)===Number(b);
+  return String(a)===String(b);
+}
+function boolValue(value){if(typeof value==='boolean')return value;if(typeof value==='number')return value!==0;return ['true','1','on','yes'].includes(String(value).toLowerCase());}
+function setTargetValue(id,value){
+  const target=editorTargets[String(id)];if(!target)return;
+  if(Number(target.variableType)===0)target.value=boolValue(value);
+  else if(Number(target.variableType)===1)target.value=Number.parseInt(value,10);
+  else if(Number(target.variableType)===2)target.value=Number.parseFloat(value);
+  else target.value=String(value);
+}
+function removeDevice(id){delete editorTargets[String(id)];renderTargets();}
+function saveSceneEditor(){
+  const sceneId=editorSceneId;
+  const name=document.getElementById('sceneName').value.trim();
+  if(!name){showToast('Bitte einen Namen für die Szene eingeben.');document.getElementById('sceneName').focus();return;}
+  const payload={name,icon:document.getElementById('sceneIcon').value||'🎬',targets:editorTargets};
+  closeSceneEditor();
+  if(sceneId===null)request('CreateScene',JSON.stringify(payload));
+  else request('UpdateScene',JSON.stringify({sceneId,...payload}));
+}
+function deleteScene(id,name){if(confirm('Szene „'+name+'“ löschen?'))request('DeleteScene',id);}
+function showToast(message){
+  const toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');
+  window.clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>toast.classList.remove('show'),3000);
+}
+document.addEventListener('DOMContentLoaded',()=>request('GetTileState',''));
+</script>
 </body>
 </html>
+
