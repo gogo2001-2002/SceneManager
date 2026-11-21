@@ -50,3 +50,4 @@ SM_SetSceneDeviceValue($instanceID, 1, 58440, 0, false);
 ## Installation
 
 Das Modul ist ein IP-Symcon Eigenmodul. Lege eine Instanz an, konfiguriere Szenenname und Icon und öffne danach die HTML-Kachel. Die Gerätezuordnung und Zielwerte pflegst du ausschließlich innerhalb der jeweiligen Szene.
+
