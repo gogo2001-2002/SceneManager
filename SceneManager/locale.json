@@ -14,18 +14,10 @@
             "Start": "Starten",
             "Save": "Speichern",
             "Ready": "Bereit",
-            "Devices": "Geräte",
+            "Devices": "Geräte pro Szene in der HTML-Kachel",
             "Scenes": "Szenen",
-            "Device Configuration": "Gerätekonfiguration",
             "Scene Configuration": "Szenenkonfiguration",
             "Options & Visualization": "Optionen & Visualisierung",
-            "Device Name": "Gerätename",
-            "Device Type": "Gerätetyp",
-            "Light (On/Off)": "Licht (An/Aus)",
-            "Switch (On/Off)": "Schalten (An/Aus)",
-            "Shutter (Up/Down/Position)": "Rollo (Hoch/Runter/Position)",
-            "Climate (On/Off)": "Klimaanlage (An/Aus)",
-            "Target Variable": "Zielvariable",
             "Scene ID": "Szenen-ID",
             "Scene Name": "Szenenname",
             "Icon": "Icon",
@@ -40,3 +32,4 @@
         }
     }
 }
+
